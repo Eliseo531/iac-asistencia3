@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { getDatabaseConfig } from './config/database.config';
 import { AuthModule } from './features/auth/auth.module';
+import { ModulesModule } from './features/modules/modules.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from './features/auth/auth.module';
       useFactory: getDatabaseConfig,
     }),
     AuthModule,
+    ModulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
