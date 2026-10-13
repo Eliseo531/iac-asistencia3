@@ -3,10 +3,14 @@ import {
   HttpStatus,
   Post,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -20,8 +24,12 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { StudentImportValidationResultDto } from './dto/import-validation-result.dto';
+import { ScheduleValidationResultDto } from './dto/schedule-validation-result.dto';
+import { ModulePreviewSummaryDto } from './dto/module-preview-summary.dto';
 import { ExcelValidationException } from './exceptions/excel-validation.exception';
 import { ExcelParserService } from './services/excel-parser.service';
+import { ScheduleParserService } from './services/schedule-parser.service';
+import { ModulesService } from './services/modules.service';
 
 @ApiTags('Modules')
 @ApiBearerAuth('jwt-auth')
@@ -29,7 +37,11 @@ import { ExcelParserService } from './services/excel-parser.service';
 @Roles(UserRole.ADMIN)
 @Controller('modules')
 export class ModulesController {
-  constructor(private readonly excelParserService: ExcelParserService) {}
+  constructor(
+    private readonly excelParserService: ExcelParserService,
+    private readonly scheduleParserService: ScheduleParserService,
+    private readonly modulesService: ModulesService,
+  ) {}
 
   @Post('import/students')
   @ApiOperation({
@@ -77,7 +89,6 @@ export class ModulesController {
 
     const result = await this.excelParserService.parseStudentsExcel(file.buffer);
 
-    // Si existen errores por fila, emitir excepción controlada 422 con el desglose (RF-11)
     if (result.hasErrors) {
       throw new ExcelValidationException(
         `Se encontraron ${result.errorCount} errores en el archivo Excel de estudiantes`,
@@ -86,5 +97,133 @@ export class ModulesController {
     }
 
     return result;
+  }
+
+  @Post('import/schedules')
+  @ApiOperation({
+    summary: 'Importar y validar calendario de clases vía Excel (RF-12, RN-04)',
+    description:
+      'Procesa un archivo .xlsx con las columnas "Fecha", "Hora inicio" y "Hora fin". Valida formato de fecha, horas de 24h, coherencia temporal y unicidad de fecha. Horarios son informativos.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description:
+            'Archivo Excel (.xlsx o .xls) con las columnas Fecha, Hora inicio y Hora fin',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'Calendario procesado y validado exitosamente sin errores.',
+    type: ScheduleValidationResultDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description:
+      'El calendario contiene fechas repetidas o formatos de hora inválidos.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'No autorizado. Se requiere token JWT administrativo.',
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async importSchedules(
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<ScheduleValidationResultDto> {
+    if (!file || !file.buffer) {
+      throw new ExcelValidationException(
+        'Debe seleccionar un archivo Excel de calendario válido para procesar',
+      );
+    }
+
+    const result = await this.scheduleParserService.parseSchedulesExcel(
+      file.buffer,
+    );
+
+    if (result.hasErrors) {
+      throw new ExcelValidationException(
+        `Se encontraron ${result.errorCount} errores en el calendario de fechas de clase`,
+        result,
+      );
+    }
+
+    return result;
+  }
+
+  @Post('preview')
+  @ApiOperation({
+    summary:
+      'Generar vista previa consolidada de estudiantes y calendario antes de activar (RF-16)',
+    description:
+      'Procesa simultáneamente ambos archivos Excel y retorna el resumen consolidado de estudiantes y clases, validando si el módulo puede activarse sin errores.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        studentsFile: {
+          type: 'string',
+          format: 'binary',
+          description: 'Archivo Excel de estudiantes (.xlsx)',
+        },
+        schedulesFile: {
+          type: 'string',
+          format: 'binary',
+          description: 'Archivo Excel de fechas de clase (.xlsx)',
+        },
+      },
+      required: ['studentsFile', 'schedulesFile'],
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'Vista previa consolidada generada con éxito.',
+    type: ModulePreviewSummaryDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description:
+      'Uno o ambos archivos contienen errores de validación.',
+  })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'studentsFile', maxCount: 1 },
+      { name: 'schedulesFile', maxCount: 1 },
+    ]),
+  )
+  async previewModule(
+    @UploadedFiles()
+    files: {
+      studentsFile?: Express.Multer.File[];
+      schedulesFile?: Express.Multer.File[];
+    },
+  ): Promise<ModulePreviewSummaryDto> {
+    const studentsBuffer = files?.studentsFile?.[0]?.buffer;
+    const schedulesBuffer = files?.schedulesFile?.[0]?.buffer;
+
+    const summary = await this.modulesService.previewModuleData(
+      studentsBuffer,
+      schedulesBuffer,
+    );
+
+    if (!summary.isValid) {
+      throw new ExcelValidationException(
+        'La vista previa contiene errores que deben subsanarse antes de activar el módulo',
+        summary,
+      );
+    }
+
+    return summary;
   }
 }
