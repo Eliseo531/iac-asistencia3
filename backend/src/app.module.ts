@@ -8,6 +8,7 @@ import { getDatabaseConfig } from './config/database.config';
 import { ActivityLogsModule } from './features/activity-logs/activity-logs.module';
 import { AuthModule } from './features/auth/auth.module';
 import { ModulesModule } from './features/modules/modules.module';
+import { AttendancesModule } from './features/attendances/attendances.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ModulesModule } from './features/modules/modules.module';
     ActivityLogsModule,
     AuthModule,
     ModulesModule,
+    AttendancesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
