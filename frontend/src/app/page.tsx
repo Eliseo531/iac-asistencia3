@@ -1,5 +1,10 @@
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'Sistema de Asistencia | Portal Principal',
+  description: 'Plataforma para el registro y control de asistencias por módulos',
+};
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-zinc-100 to-indigo-50/20 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 flex flex-col justify-center items-center px-4 py-12">
@@ -50,9 +55,12 @@ export default function Home() {
             </span>
           </Link>
 
-          <div className="p-6 rounded-2xl bg-white/60 dark:bg-zinc-900/60 border border-zinc-200/60 dark:border-zinc-800/60 text-left flex flex-col justify-between opacity-80">
+          <Link
+            href="/login"
+            className="group p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-left flex flex-col justify-between"
+          >
             <div>
-              <div className="w-10 h-10 rounded-xl bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 flex items-center justify-center mb-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -71,13 +79,13 @@ export default function Home() {
                 Portal Estudiantes
               </h2>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Acceso para alumnos mediante número de matrícula o correo para marcar asistencia en fecha de clase activa (P2).
+                Acceso sin contraseña mediante número de registro o correo para marcar asistencia en fecha activa (US-02).
               </p>
             </div>
-            <span className="mt-4 text-xs font-semibold text-zinc-400">
-              Asignado a Programador 2
+            <span className="mt-4 text-xs font-semibold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+              Ingresar como Alumno →
             </span>
-          </div>
+          </Link>
         </div>
       </div>
     </div>

@@ -5,8 +5,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { getDatabaseConfig } from './config/database.config';
+import { ActivityLogsModule } from './features/activity-logs/activity-logs.module';
 import { AuthModule } from './features/auth/auth.module';
 import { ModulesModule } from './features/modules/modules.module';
+import { AttendancesModule } from './features/attendances/attendances.module';
 
 @Module({
   imports: [
@@ -17,8 +19,10 @@ import { ModulesModule } from './features/modules/modules.module';
     TypeOrmModule.forRootAsync({
       useFactory: getDatabaseConfig,
     }),
+    ActivityLogsModule,
     AuthModule,
     ModulesModule,
+    AttendancesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

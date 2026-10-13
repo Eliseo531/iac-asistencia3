@@ -3,17 +3,24 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Student } from '../students/entities/student.entity';
+import { AcademicModule } from '../modules/entities/academic-module.entity';
 import { ActivityLog } from '../activity-logs/entities/activity-log.entity';
+import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
+import { AdminUser } from './entities/admin-user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AdminUser } from './entities/admin-user.entity';
+import { StudentAuthController } from './student-auth.controller';
+import { StudentAuthService } from './student-auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtService as CustomJwtService } from '../../common/services/jwt.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AdminUser, ActivityLog]),
+    TypeOrmModule.forFeature([AdminUser, Student, AcademicModule, ActivityLog]),
+    ActivityLogsModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -28,8 +35,22 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       }),
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, JwtModule],
+  controllers: [AuthController, StudentAuthController],
+  providers: [
+    AuthService,
+    StudentAuthService,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+    CustomJwtService,
+  ],
+  exports: [
+    AuthService,
+    StudentAuthService,
+    JwtAuthGuard,
+    RolesGuard,
+    JwtModule,
+    CustomJwtService,
+  ],
 })
 export class AuthModule {}
