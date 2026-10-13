@@ -3,6 +3,16 @@
 import React from 'react';
 import { useAttendanceCheckIn } from '../hooks/useAttendanceCheckIn';
 import { formatDate } from '../../../lib/utils';
+import {
+  CalendarDays,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  CalendarOff,
+  ShieldCheck,
+  Loader2,
+  Check,
+} from 'lucide-react';
 
 interface TodayClassCardProps {
   moduleName?: string;
@@ -40,19 +50,19 @@ export function TodayClassCard({
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+    <div className="w-full max-w-xl mx-auto bg-white dark:bg-zinc-900 rounded-3xl shadow-xl dark:shadow-2xl border border-slate-200/80 dark:border-zinc-800 overflow-hidden transition-colors">
       {/* Header de la tarjeta */}
-      <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 p-6 text-white">
+      <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 dark:from-indigo-700 dark:to-indigo-800 p-6 sm:p-7 text-white">
         <div className="flex items-center justify-between mb-2">
-          <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold tracking-wider uppercase">
+          <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold tracking-wider uppercase border border-white/10">
             {moduleCode || 'Módulo Activo'}
           </span>
-          <span className="text-xs text-indigo-100 flex items-center gap-1">
+          <span className="text-xs text-indigo-100 flex items-center gap-1.5 font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             En línea
           </span>
         </div>
-        <h2 className="text-xl font-bold leading-snug">{moduleName}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold leading-snug">{moduleName}</h2>
       </div>
 
       <div className="p-6 sm:p-8 space-y-6">
@@ -60,22 +70,12 @@ export function TodayClassCard({
         {successMessage && (
           <div
             role="alert"
-            className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-start space-x-3 animate-fade-in"
+            className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-sm flex items-start space-x-3 animate-fade-in"
           >
-            <svg
-              className="w-5 h-5 flex-shrink-0 mt-0.5 text-emerald-600"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <ShieldCheck className="w-5 h-5 flex-shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
             <div>
               <p className="font-semibold">{successMessage}</p>
-              <p className="text-xs text-emerald-600 mt-0.5">
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
                 Tu asistencia ha sido auditada y almacenada de forma inmutable.
               </p>
             </div>
@@ -86,19 +86,9 @@ export function TodayClassCard({
         {errorMessage && (
           <div
             role="alert"
-            className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-start space-x-3"
+            className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-sm flex items-start space-x-3"
           >
-            <svg
-              className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-600"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
             <span className="font-medium">{errorMessage}</span>
           </div>
         )}
@@ -106,54 +96,36 @@ export function TodayClassCard({
         {/* Estado de carga */}
         {isLoading ? (
           <div className="py-12 flex flex-col items-center justify-center space-y-3">
-            <svg
-              className="animate-spin h-8 w-8 text-indigo-600"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v8H4z"
-              ></path>
-            </svg>
-            <p className="text-sm text-slate-500">Verificando calendario de clases...</p>
+            <Loader2 className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
+            <p className="text-sm text-slate-500 dark:text-zinc-400">Verificando calendario de clases...</p>
           </div>
         ) : data?.hasClassToday ? (
           /* Hay clase programada hoy */
           <div className="space-y-6">
-            <div className="p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between">
+            <div className="p-5 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/70 dark:border-zinc-700/60 flex items-center justify-between">
               <div>
-                <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider block mb-1">
+                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block mb-1">
                   Sesión Programada Hoy
                 </span>
-                <p className="text-base font-bold text-slate-800">
-                  {formatDate(data.classSchedule?.classDate || '')}
-                </p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Horario: {data.classSchedule?.startTime} a {data.classSchedule?.endTime}
-                </p>
+                <div className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-zinc-100">
+                  <CalendarDays className="w-4 h-4 text-slate-500 dark:text-zinc-400" />
+                  <span>{formatDate(data.classSchedule?.classDate || '')}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400 mt-1">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Horario: {data.classSchedule?.startTime} a {data.classSchedule?.endTime}</span>
+                </div>
               </div>
 
               <div className="text-right">
                 {data.alreadyMarked ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                    <svg className="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     Presente
                   </span>
                 ) : (
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     Pendiente
                   </span>
                 )}
@@ -162,21 +134,19 @@ export function TodayClassCard({
 
             {/* Botón de Marcación Dinámico */}
             {data.alreadyMarked ? (
-              <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-2">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mb-1">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
+              <div className="p-6 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-800 text-center space-y-2">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mb-1 border border-emerald-200 dark:border-emerald-800">
+                  <Check className="w-6 h-6 stroke-[2.5]" />
                 </div>
-                <h3 className="font-bold text-slate-800 text-base">
+                <h3 className="font-bold text-slate-800 dark:text-zinc-100 text-base">
                   Asistencia Ya Registrada
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-zinc-400">
                   Marcada a las {formatTime(data.attendance?.markedAt)}
                 </p>
                 <button
                   disabled
-                  className="w-full mt-2 py-3 px-4 bg-slate-200 text-slate-400 font-medium rounded-xl cursor-not-allowed"
+                  className="w-full mt-2 py-3.5 px-4 bg-slate-200 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 font-semibold rounded-xl cursor-not-allowed border border-slate-300 dark:border-zinc-700"
                 >
                   Marca Completada para Esta Sesión
                 </button>
@@ -186,42 +156,21 @@ export function TodayClassCard({
                 <button
                   onClick={handleCheckIn}
                   disabled={isSubmitting}
-                  className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-lg rounded-2xl shadow-xl shadow-emerald-200 transition-all flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01]"
+                  className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-lg rounded-2xl shadow-xl shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
-                      <svg
-                        className="animate-spin h-6 w-6 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v8H4z"
-                        ></path>
-                      </svg>
+                      <Loader2 className="w-6 h-6 animate-spin text-white" />
                       <span>Guardando marca...</span>
                     </>
                   ) : (
                     <>
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <CheckCircle2 className="w-6 h-6" />
                       <span>Registrar Asistencia de Hoy</span>
                     </>
                   )}
                 </button>
-                <p className="text-center text-xs text-slate-400 mt-2">
+                <p className="text-center text-xs text-slate-400 dark:text-zinc-500 mt-2">
                   Solo se permite una marcación por estudiante por sesión de clase.
                 </p>
               </div>
@@ -230,30 +179,31 @@ export function TodayClassCard({
         ) : (
           /* No hay clase programada hoy (RN-04) */
           <div className="py-8 text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 text-slate-400 mb-1">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 mb-1 border border-slate-200 dark:border-zinc-700">
+              <CalendarOff className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 text-lg">
+              <h3 className="font-bold text-slate-800 dark:text-zinc-100 text-lg">
                 Hoy no hay clase programada
               </h3>
-              <p className="text-sm text-slate-500 max-w-sm mx-auto mt-1">
+              <p className="text-sm text-slate-500 dark:text-zinc-400 max-w-sm mx-auto mt-1">
                 La marcación sólo está habilitada en días hábiles de clase fijados en el calendario académico.
               </p>
             </div>
 
             {data?.nextScheduledClass && (
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 inline-block">
-                <strong>Próxima clase programada:</strong>{' '}
-                {formatDate(data.nextScheduledClass.classDate)} de {data.nextScheduledClass.startTime} a {data.nextScheduledClass.endTime}
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 text-xs text-slate-600 dark:text-zinc-300 inline-flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-indigo-500" />
+                <span>
+                  <strong>Próxima clase programada:</strong>{' '}
+                  {formatDate(data.nextScheduledClass.classDate)} ({data.nextScheduledClass.startTime} a {data.nextScheduledClass.endTime})
+                </span>
               </div>
             )}
 
             <button
               disabled
-              className="w-full py-3.5 px-4 bg-slate-100 text-slate-400 font-semibold rounded-xl cursor-not-allowed border border-slate-200"
+              className="w-full py-3.5 px-4 bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 font-semibold rounded-xl cursor-not-allowed border border-slate-200 dark:border-zinc-700"
             >
               Botón de Marcación Deshabilitado (Fuera de Fecha)
             </button>
