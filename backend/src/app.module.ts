@@ -7,6 +7,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
 import { getDatabaseConfig } from './config/database.config';
 import { ActivityLogsModule } from './features/activity-logs/activity-logs.module';
 import { AuthModule } from './features/auth/auth.module';
+import { ModulesModule } from './features/modules/modules.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthModule } from './features/auth/auth.module';
     }),
     ActivityLogsModule,
     AuthModule,
+    ModulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
