@@ -20,8 +20,10 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { StudentImportValidationResultDto } from './dto/import-validation-result.dto';
+import { ScheduleValidationResultDto } from './dto/schedule-validation-result.dto';
 import { ExcelValidationException } from './exceptions/excel-validation.exception';
 import { ExcelParserService } from './services/excel-parser.service';
+import { ScheduleParserService } from './services/schedule-parser.service';
 
 @ApiTags('Modules')
 @ApiBearerAuth('jwt-auth')
@@ -29,7 +31,10 @@ import { ExcelParserService } from './services/excel-parser.service';
 @Roles(UserRole.ADMIN)
 @Controller('modules')
 export class ModulesController {
-  constructor(private readonly excelParserService: ExcelParserService) {}
+  constructor(
+    private readonly excelParserService: ExcelParserService,
+    private readonly scheduleParserService: ScheduleParserService,
+  ) {}
 
   @Post('import/students')
   @ApiOperation({
@@ -77,10 +82,68 @@ export class ModulesController {
 
     const result = await this.excelParserService.parseStudentsExcel(file.buffer);
 
-    // Si existen errores por fila, emitir excepción controlada 422 con el desglose (RF-11)
     if (result.hasErrors) {
       throw new ExcelValidationException(
         `Se encontraron ${result.errorCount} errores en el archivo Excel de estudiantes`,
+        result,
+      );
+    }
+
+    return result;
+  }
+
+  @Post('import/schedules')
+  @ApiOperation({
+    summary: 'Importar y validar calendario de clases vía Excel (RF-12, RN-04)',
+    description:
+      'Procesa un archivo .xlsx con las columnas "Fecha", "Hora inicio" y "Hora fin". Valida formato de fecha, horas de 24h, coherencia temporal y unicidad de fecha. Horarios son informativos.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description:
+            'Archivo Excel (.xlsx o .xls) con las columnas Fecha, Hora inicio y Hora fin',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'Calendario procesado y validado exitosamente sin errores.',
+    type: ScheduleValidationResultDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    description: 'El calendario contiene fechas repetidas o formatos de hora inválidos.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'No autorizado. Se requiere token JWT administrativo.',
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async importSchedules(
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<ScheduleValidationResultDto> {
+    if (!file || !file.buffer) {
+      throw new ExcelValidationException(
+        'Debe seleccionar un archivo Excel de calendario válido para procesar',
+      );
+    }
+
+    const result = await this.scheduleParserService.parseSchedulesExcel(
+      file.buffer,
+    );
+
+    if (result.hasErrors) {
+      throw new ExcelValidationException(
+        `Se encontraron ${result.errorCount} errores en el calendario de fechas de clase`,
         result,
       );
     }
