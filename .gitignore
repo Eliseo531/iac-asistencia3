@@ -18,6 +18,8 @@ backend/dist/
 .env.*.local
 *.env
 !.env.example
+!*.env.example
+!*.env.local.example
 
 # Logs & caches
 *.log

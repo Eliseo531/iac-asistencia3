@@ -1,79 +1,84 @@
-﻿# Frontend del Sistema de Asistencia
+# Frontend del Sistema de Registro y Control de Asistencia
 
-Aplicación web desarrollada con **Next.js** (App Router) y **Tailwind CSS** para la interfaz de usuario del Sistema de Asistencia Laboral.
+Aplicación web desarrollada con **Next.js** (App Router), **React** y **Tailwind CSS** para la interfaz de usuario del Sistema de Asistencia de Estudiantes y Administración.
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-* **Framework:** [Next.js](https://nextjs.org/) (App Router, React 19)
-* **Lenguaje:** TypeScript
+* **Framework:** [Next.js](https://nextjs.org/) (App Router)
+* **Lenguaje:** TypeScript (modo estricto)
 * **Estilos:** [Tailwind CSS](https://tailwindcss.com/)
-* **Iconografía & UI:** Diseño modular basado en componentes atómicos (`src/components/ui/`)
+* **Cliente API:** Cliente HTTP tipado con soporte de desacoplamiento para respuestas estándar `{ status, message, data }`
 
 ---
 
-## 🏛️ Arquitectura del Software (App Router + Feature-Sliced)
+## 🚀 Puesta en Marcha (Instalación y Ejecución)
 
-La aplicación mantiene el directorio `src/app/` como una capa de enrutamiento delgada, delegando la lógica y vistas a módulos por característica dentro de `src/features/`:
-
-```text
-src/
-├── app/                             # Capa de Enrutamiento (App Router)
-│   ├── (auth)/                      # Rutas públicas (Login)
-│   │   └── login/page.tsx
-│   ├── (dashboard)/                 # Rutas privadas protegidas
-│   │   ├── layout.tsx               # Shell del dashboard (Navbar, Sidebar)
-│   │   ├── attendance/page.tsx      # Vista de marcaciones y asistencias
-│   │   └── employees/page.tsx       # Vista de gestión de empleados
-│   ├── error.tsx                    # Error boundary global
-│   ├── loading.tsx                  # Loading skeleton global
-│   └── layout.tsx                   # Root Layout con fuentes y proveedores
-├── features/                        # Módulos de negocio (Features)
-│   └── attendance/                  # Característica: Asistencias
-│       ├── components/              # AttendanceTable.tsx, CheckInButton.tsx
-│       ├── hooks/                   # useAttendance.ts, useCheckIn.ts
-│       ├── services/                # attendance.service.ts (llamadas HTTP)
-│       └── types/                   # attendance.types.ts
-├── components/                      # Componentes reutilizables generales
-│   ├── ui/                          # Componentes atómicos (Button, Input, Modal, Table, Badge)
-│   └── layout/                      # Navbar, Sidebar, Footer
-├── lib/                             # Clientes y utilidades
-│   ├── api-client.ts                # Cliente HTTP que desempaqueta el sobre del backend
-│   └── utils.ts                     # Utilidades (cn para Tailwind)
-└── types/                           # Tipos globales (ApiResponse<T>, UserSession)
+### 1. Instalar dependencias
+```bash
+npm install
 ```
 
----
-
-## 🌐 Conexión con el Backend
-
-El frontend se comunica con el backend mediante un cliente tipado centralizado (`src/lib/api-client.ts`) que desempaqueta automáticamente las respuestas estandarizadas `{ status: 'success' | 'fail' | 'error' }`.
-
-Para configurar la URL del backend, crea un archivo `.env.local`:
+### 2. Configurar variables de entorno
+Crea tu archivo `.env.local` a partir de `.env.local.example`:
+```bash
+cp .env.local.example .env.local
+```
+Contenido por defecto:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
 ```
 
----
-
-## 🚀 Comandos de Ejecución
-
+### 3. Iniciar el servidor de desarrollo
 ```bash
-# Instalar dependencias
-npm install
-
-# Modo desarrollo
 npm run dev
-
-# Compilar para producción
-npm run build
-
-# Iniciar servidor de producción
-npm run start
-
-# Comprobación de linter
-npm run lint
 ```
 
 Por defecto, la aplicación estará disponible en: `http://localhost:3001` (o `http://localhost:3000`).
+
+---
+
+## 🔑 Credenciales para Pruebas en el Frontend
+
+Para probar las pantallas mientras desarrollas, utiliza los datos cargados por la semilla del backend (`npm run seed` en la carpeta `backend`):
+
+* **Portal del Estudiante (`/` o `/estudiante/login`):**
+  * Acceso rápido con matrícula: `1001` (o correo `juan@gmail.com`).
+  * Sin contraseña requerida (**RF-01**).
+  * Hoy es fecha de clase programada en la semilla, por lo que el botón de marcación de asistencia estará habilitado para probar.
+* **Portal del Administrador (`/admin/login`):**
+  * Usuario / Correo: `admin@sistema.com` (o `admin`).
+  * Contraseña: `admin123`.
+
+---
+
+## 🏛️ Arquitectura Frontend (App Router)
+
+```text
+src/
+├── app/                             # Rutas del Sistema
+│   ├── (auth)/                      # Rutas de autenticación
+│   │   ├── login/page.tsx           # Login de estudiantes (RF-01)
+│   │   └── admin/login/page.tsx     # Login administrativo (RF-02)
+│   ├── admin/                       # Panel privado administrativo
+│   │   ├── modulo/importar/page.tsx # Carga de Excel (RF-11, RF-12)
+│   │   ├── estudiantes/page.tsx     # Búsqueda y nómina (RF-06)
+│   │   └── asistencias/page.tsx     # Planilla general (RF-08, RF-07)
+│   └── estudiante/                  # Portal del estudiante
+│       └── asistencia/page.tsx      # Botón de marcar hoy e historial (RF-03, RF-05)
+├── components/                      # Componentes reutilizables UI
+│   ├── ui/                          # Botones, tablas, inputs, alertas, modales
+│   └── layout/                      # Navbar, Sidebar, Footer
+├── lib/                             # Clientes HTTP y utilidades
+│   └── api-client.ts                # Cliente Axios / Fetch con interceptor
+└── types/                           # Definiciones TypeScript de entidades y DTOs
+```
+
+---
+
+## 📚 Documentación para Desarrolladores
+
+* **Repartición de Historias (2 Devs):** [`../docs/reparticion-2-programadores.md`](../docs/reparticion-2-programadores.md)
+* **Historias de Usuario y Criterios BDD:** [`../docs/historias-de-usuario.md`](../docs/historias-de-usuario.md)
+* **Diagrama de Clases UML:** [`../docs/diagrama-de-clases.md`](../docs/diagrama-de-clases.md)
