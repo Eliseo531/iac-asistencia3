@@ -41,6 +41,20 @@ export class AttendancesController {
     return this.attendancesService.getTodayStatus(user.sub, user.moduleId);
   }
 
+  @Get('my-history')
+  @ApiOperation({
+    summary: 'Consultar historial personal de asistencias y faltas calculadas',
+    description:
+      'Retorna la relación de todas las clases del módulo activo, calculando automáticamente como FALTA las clases pasadas sin asistencia (RF-04, RF-05, RN-05, US-09).',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial y resumen de asistencias obtenido correctamente.',
+  })
+  async getMyHistory(@CurrentUser() user: any) {
+    return this.attendancesService.getMyHistory(user.sub, user.moduleId);
+  }
+
   @Post('check-in')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

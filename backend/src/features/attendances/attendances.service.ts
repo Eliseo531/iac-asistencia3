@@ -192,4 +192,80 @@ export class AttendancesService {
 
     return savedAttendance;
   }
+
+  /**
+   * Consulta el historial personal de asistencias del estudiante con cálculo automático de faltas (RF-04, RF-05, RN-05, US-09)
+   */
+  async getMyHistory(studentId: string, moduleId: string) {
+    const today = this.getTodayString();
+
+    // 1. Obtener todas las clases programadas del módulo
+    const schedules = await this.scheduleRepository.find({
+      where: { moduleId },
+      order: { classDate: 'ASC' },
+    });
+
+    // 2. Obtener asistencias registradas del estudiante
+    const attendances = await this.attendanceRepository.find({
+      where: { studentId },
+    });
+
+    const attendanceMap = new Map<string, Attendance>();
+    for (const att of attendances) {
+      attendanceMap.set(att.classScheduleId, att);
+    }
+
+    let attendedCount = 0;
+    let absentCount = 0;
+    let pastClasses = 0;
+
+    const sessions = schedules.map((schedule) => {
+      const att = attendanceMap.get(schedule.id);
+      let status: 'PRESENTE' | 'FALTA' | 'PROGRAMADA' | 'PENDIENTE_HOY';
+      let markedAt: Date | string | null = null;
+
+      if (att && att.status === AttendanceStatus.PRESENTE) {
+        status = 'PRESENTE';
+        markedAt = att.markedAt;
+        attendedCount++;
+        pastClasses++;
+      } else if (schedule.classDate < today) {
+        // Regla de Negocio RN-05: Fecha pasada sin registro es automáticamente FALTA
+        status = 'FALTA';
+        absentCount++;
+        pastClasses++;
+      } else if (schedule.classDate === today) {
+        status = 'PENDIENTE_HOY';
+      } else {
+        status = 'PROGRAMADA';
+      }
+
+      return {
+        id: schedule.id,
+        classDate: schedule.classDate,
+        startTime: schedule.startTime,
+        endTime: schedule.endTime,
+        status,
+        markedAt,
+      };
+    });
+
+    const totalClasses = schedules.length;
+    const attendancePercentage =
+      pastClasses > 0
+        ? Math.round((attendedCount / pastClasses) * 1000) / 10
+        : 100.0;
+
+    return {
+      summary: {
+        totalClasses,
+        pastClasses,
+        attendedCount,
+        absentCount,
+        attendancePercentage,
+      },
+      sessions,
+    };
+  }
 }
+

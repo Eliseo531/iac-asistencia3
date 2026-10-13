@@ -18,3 +18,25 @@ export interface TodayStatusData {
   attendance: AttendanceRecord | null;
   nextScheduledClass?: ClassScheduleSummary | null;
 }
+
+export interface AttendanceSummaryMetrics {
+  totalClasses: number;
+  pastClasses: number;
+  attendedCount: number;
+  absentCount: number;
+  attendancePercentage: number;
+}
+
+export interface ClassSessionHistoryItem {
+  id: string;
+  classDate: string;
+  startTime: string;
+  endTime: string;
+  status: 'PRESENTE' | 'FALTA' | 'PROGRAMADA' | 'PENDIENTE_HOY';
+  markedAt: string | null;
+}
+
+export interface StudentHistoryResponse {
+  summary: AttendanceSummaryMetrics;
+  sessions: ClassSessionHistoryItem[];
+}

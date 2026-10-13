@@ -202,4 +202,41 @@ describe('AttendancesService', () => {
       ).rejects.toThrow(AlreadyMarkedAttendanceException);
     });
   });
+
+  describe('getMyHistory', () => {
+    it('debe retornar historial con clases pasadas sin marca como FALTA (RN-05) y calcular metricas', async () => {
+      const pastDate = '2026-10-01';
+      const todayDate = new Date().toISOString().split('T')[0];
+      const futureDate = '2026-10-25';
+
+      scheduleRepo.find = jest.fn().mockResolvedValue([
+        { id: 'sch-1', classDate: pastDate, startTime: '18:00', endTime: '21:00' },
+        { id: 'sch-2', classDate: todayDate, startTime: '18:00', endTime: '21:00' },
+        { id: 'sch-3', classDate: futureDate, startTime: '18:00', endTime: '21:00' },
+      ]);
+
+      attendanceRepo.find = jest.fn().mockResolvedValue([
+        {
+          classScheduleId: 'sch-2',
+          status: AttendanceStatus.PRESENTE,
+          markedAt: new Date(),
+        },
+      ]);
+
+      const result = await service.getMyHistory('student-1', 'module-1');
+
+      expect(result.summary.totalClasses).toBe(3);
+      expect(result.summary.pastClasses).toBe(2);
+      expect(result.summary.attendedCount).toBe(1);
+      expect(result.summary.absentCount).toBe(1);
+      expect(result.summary.attendancePercentage).toBe(50);
+
+      // sch-1 es clase pasada sin marca -> FALTA (RN-05)
+      expect(result.sessions[0].status).toBe('FALTA');
+      // sch-2 es clase de hoy con marca -> PRESENTE
+      expect(result.sessions[1].status).toBe('PRESENTE');
+      // sch-3 es clase futura -> PROGRAMADA
+      expect(result.sessions[2].status).toBe('PROGRAMADA');
+    });
+  });
 });
