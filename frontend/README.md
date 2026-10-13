@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# Frontend del Sistema de Asistencia
 
-## Getting Started
+Aplicación web desarrollada con **Next.js** (App Router) y **Tailwind CSS** para la interfaz de usuario del Sistema de Asistencia Laboral.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🛠️ Stack Tecnológico
+
+* **Framework:** [Next.js](https://nextjs.org/) (App Router, React 19)
+* **Lenguaje:** TypeScript
+* **Estilos:** [Tailwind CSS](https://tailwindcss.com/)
+* **Iconografía & UI:** Diseño modular basado en componentes atómicos (`src/components/ui/`)
+
+---
+
+## 🏛️ Arquitectura del Software (App Router + Feature-Sliced)
+
+La aplicación mantiene el directorio `src/app/` como una capa de enrutamiento delgada, delegando la lógica y vistas a módulos por característica dentro de `src/features/`:
+
+```text
+src/
+├── app/                             # Capa de Enrutamiento (App Router)
+│   ├── (auth)/                      # Rutas públicas (Login)
+│   │   └── login/page.tsx
+│   ├── (dashboard)/                 # Rutas privadas protegidas
+│   │   ├── layout.tsx               # Shell del dashboard (Navbar, Sidebar)
+│   │   ├── attendance/page.tsx      # Vista de marcaciones y asistencias
+│   │   └── employees/page.tsx       # Vista de gestión de empleados
+│   ├── error.tsx                    # Error boundary global
+│   ├── loading.tsx                  # Loading skeleton global
+│   └── layout.tsx                   # Root Layout con fuentes y proveedores
+├── features/                        # Módulos de negocio (Features)
+│   └── attendance/                  # Característica: Asistencias
+│       ├── components/              # AttendanceTable.tsx, CheckInButton.tsx
+│       ├── hooks/                   # useAttendance.ts, useCheckIn.ts
+│       ├── services/                # attendance.service.ts (llamadas HTTP)
+│       └── types/                   # attendance.types.ts
+├── components/                      # Componentes reutilizables generales
+│   ├── ui/                          # Componentes atómicos (Button, Input, Modal, Table, Badge)
+│   └── layout/                      # Navbar, Sidebar, Footer
+├── lib/                             # Clientes y utilidades
+│   ├── api-client.ts                # Cliente HTTP que desempaqueta el sobre del backend
+│   └── utils.ts                     # Utilidades (cn para Tailwind)
+└── types/                           # Tipos globales (ApiResponse<T>, UserSession)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🌐 Conexión con el Backend
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+El frontend se comunica con el backend mediante un cliente tipado centralizado (`src/lib/api-client.ts`) que desempaqueta automáticamente las respuestas estandarizadas `{ status: 'success' | 'fail' | 'error' }`.
 
-## Learn More
+Para configurar la URL del backend, crea un archivo `.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 Comandos de Ejecución
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Instalar dependencias
+npm install
 
-## Deploy on Vercel
+# Modo desarrollo
+npm run dev
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Compilar para producción
+npm run build
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Iniciar servidor de producción
+npm run start
+
+# Comprobación de linter
+npm run lint
+```
+
+Por defecto, la aplicación estará disponible en: `http://localhost:3001` (o `http://localhost:3000`).
