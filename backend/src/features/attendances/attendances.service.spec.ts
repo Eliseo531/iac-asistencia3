@@ -11,20 +11,23 @@ import { AttendancesService } from './attendances.service';
 import { Attendance } from './entities/attendance.entity';
 import { ClassSchedule } from '../schedules/entities/class-schedule.entity';
 import { AcademicModule } from '../modules/entities/academic-module.entity';
+import { Student } from '../students/entities/student.entity';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { NotClassDayException } from './exceptions/not-class-day.exception';
 import { AlreadyMarkedAttendanceException } from './exceptions/already-marked-attendance.exception';
-import { AttendanceStatus } from '../../common/enums';
+import { AttendanceStatus, ModuleStatus, UserRole } from '../../common/enums';
 
 describe('AttendancesService', () => {
   let service: AttendancesService;
   let attendanceRepo: any;
   let scheduleRepo: any;
   let moduleRepo: any;
+  let studentRepo: any;
   let activityLogsService: any;
 
   const mockAttendanceRepo = {
     findOne: jest.fn(),
+    find: jest.fn(),
     create: jest.fn().mockImplementation((dto) => dto),
     save: jest.fn().mockImplementation((att) =>
       Promise.resolve({
@@ -33,6 +36,11 @@ describe('AttendancesService', () => {
         markedAt: new Date(),
       }),
     ),
+    createQueryBuilder: jest.fn(() => ({
+      innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]),
+    })),
   };
 
   const mockQueryBuilder = {
@@ -45,10 +53,16 @@ describe('AttendancesService', () => {
 
   const mockScheduleRepo = {
     findOne: jest.fn(),
+    find: jest.fn(),
     createQueryBuilder: jest.fn(() => mockQueryBuilder),
   };
 
   const mockModuleRepo = {
+    findOne: jest.fn(),
+  };
+
+  const mockStudentRepo = {
+    find: jest.fn(),
     findOne: jest.fn(),
   };
 
@@ -73,6 +87,10 @@ describe('AttendancesService', () => {
           useValue: mockModuleRepo,
         },
         {
+          provide: getRepositoryToken(Student),
+          useValue: mockStudentRepo,
+        },
+        {
           provide: ActivityLogsService,
           useValue: mockActivityLogsService,
         },
@@ -83,6 +101,7 @@ describe('AttendancesService', () => {
     attendanceRepo = mockAttendanceRepo;
     scheduleRepo = mockScheduleRepo;
     moduleRepo = mockModuleRepo;
+    studentRepo = mockStudentRepo;
     activityLogsService = mockActivityLogsService;
   });
 
@@ -237,6 +256,119 @@ describe('AttendancesService', () => {
       expect(result.sessions[1].status).toBe('PRESENTE');
       // sch-3 es clase futura -> PROGRAMADA
       expect(result.sessions[2].status).toBe('PROGRAMADA');
+    });
+  });
+
+  describe('getAdminMatrix (US-11)', () => {
+    it('debe calcular correctamente los totales de presentes, faltas y matriz de estudiantes', async () => {
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      moduleRepo.findOne.mockResolvedValue({
+        id: 'mod-1',
+        name: 'Módulo Piloto DevOps',
+        status: ModuleStatus.ACTIVE,
+      });
+
+      scheduleRepo.find = jest.fn().mockResolvedValue([
+        {
+          id: 'sch-1',
+          classDate: todayStr,
+          startTime: '19:00',
+          endTime: '22:00',
+        },
+      ]);
+
+      studentRepo.find = jest.fn().mockResolvedValue([
+        {
+          id: 'st-1',
+          registrationNumber: '1001',
+          fullName: 'Juan Pérez',
+          email: 'juan@gmail.com',
+        },
+        {
+          id: 'st-2',
+          registrationNumber: '1002',
+          fullName: 'María López',
+          email: 'maria@gmail.com',
+        },
+      ]);
+
+      attendanceRepo.createQueryBuilder = jest.fn(() => ({
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([
+          {
+            id: 'att-1',
+            studentId: 'st-1',
+            classScheduleId: 'sch-1',
+            status: AttendanceStatus.PRESENTE,
+            markedAt: new Date(),
+            markedByRole: UserRole.STUDENT,
+            remarks: null,
+          },
+        ]),
+      }));
+
+      const matrix = await service.getAdminMatrix({});
+
+      expect(matrix.moduleName).toBe('Módulo Piloto DevOps');
+      expect(matrix.summary.totalStudents).toBe(2);
+      expect(matrix.summary.totalClasses).toBe(1);
+      expect(matrix.summary.totalPresent).toBe(1);
+      expect(matrix.summary.totalAbsent).toBe(1);
+      expect(matrix.summary.attendancePercentage).toBe(50);
+      expect(matrix.rows).toHaveLength(2);
+    });
+  });
+
+  describe('overrideAttendance (US-12)', () => {
+    it('debe actualizar el estado de asistencia, registrar observaciones y auditar en ActivityLog', async () => {
+      moduleRepo.findOne.mockResolvedValue({
+        id: 'mod-1',
+        status: ModuleStatus.ACTIVE,
+      });
+
+      studentRepo.findOne.mockResolvedValue({
+        id: 'st-1',
+        moduleId: 'mod-1',
+        fullName: 'Juan Pérez',
+      });
+
+      scheduleRepo.findOne.mockResolvedValue({
+        id: 'sch-1',
+        moduleId: 'mod-1',
+        classDate: '2026-10-10',
+      });
+
+      attendanceRepo.findOne.mockResolvedValue({
+        id: 'att-1',
+        studentId: 'st-1',
+        classScheduleId: 'sch-1',
+        status: AttendanceStatus.FALTA,
+        remarks: null,
+      });
+
+      const result = await service.overrideAttendance(
+        {
+          studentId: 'st-1',
+          classScheduleId: 'sch-1',
+          status: AttendanceStatus.PRESENTE,
+          justification: 'Certificado médico presentado',
+        },
+        { id: 'admin-1', username: 'admin', email: 'admin@test.com' },
+      );
+
+      expect(result.status).toBe(AttendanceStatus.PRESENTE);
+      expect(result.remarks).toBe('Certificado médico presentado');
+      expect(result.markedByRole).toBe(UserRole.ADMIN);
+
+      expect(activityLogsService.createLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'UPDATE_ATTENDANCE',
+          userRole: UserRole.ADMIN,
+          entityAffected: 'Attendance',
+        }),
+      );
     });
   });
 });

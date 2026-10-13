@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { ActivityLog } from './entities/activity-log.entity';
 import { CreateActivityLogDto } from './dto/create-activity-log.dto';
 
+import { ActivityLogQueryDto } from './dto/activity-log-query.dto';
+
 @Injectable()
 export class ActivityLogsService {
   private readonly logger = new Logger(ActivityLogsService.name);
@@ -48,4 +50,50 @@ export class ActivityLogsService {
       order: { createdAt: 'DESC' },
     });
   }
+
+  /**
+   * Consulta paginada y filtrada de logs de auditoría (RF-10, US-15)
+   */
+  async findLogsWithFilters(query: ActivityLogQueryDto): Promise<{
+    data: ActivityLog[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const page = query.page && query.page > 0 ? query.page : 1;
+    const limit = query.limit && query.limit > 0 ? query.limit : 20;
+
+    const qb = this.activityLogRepository.createQueryBuilder('log');
+
+    if (query.moduleId) {
+      qb.andWhere('log.moduleId = :moduleId', { moduleId: query.moduleId });
+    }
+
+    if (query.action) {
+      qb.andWhere('log.action = :action', { action: query.action });
+    }
+
+    if (query.search && query.search.trim().length > 0) {
+      qb.andWhere(
+        '(LOWER(log.userIdentifier) LIKE :search OR LOWER(log.entityAffected) LIKE :search)',
+        { search: `%${query.search.trim().toLowerCase()}%` },
+      );
+    }
+
+    qb.orderBy('log.createdAt', 'DESC');
+    qb.skip((page - 1) * limit);
+    qb.take(limit);
+
+    const [data, total] = await qb.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+    };
+  }
 }
+

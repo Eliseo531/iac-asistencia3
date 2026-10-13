@@ -27,6 +27,22 @@ describe('ActivityLogsService', () => {
       }),
     ),
     find: jest.fn().mockResolvedValue([]),
+    createQueryBuilder: jest.fn(() => ({
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getManyAndCount: jest.fn().mockResolvedValue([
+        [
+          {
+            id: 'log-1',
+            action: ActivityAction.UPDATE_ATTENDANCE,
+            userIdentifier: 'admin@test.com',
+          },
+        ],
+        1,
+      ]),
+    })),
   };
 
   beforeEach(async () => {
@@ -92,4 +108,22 @@ describe('ActivityLogsService', () => {
       });
     });
   });
+
+  describe('findLogsWithFilters (US-15)', () => {
+    it('debe retornar resultados paginados y aplicar filtros de búsqueda', async () => {
+      const result = await service.findLogsWithFilters({
+        action: ActivityAction.UPDATE_ATTENDANCE,
+        search: 'admin',
+        page: 1,
+        limit: 10,
+      });
+
+      expect(repository.createQueryBuilder).toHaveBeenCalled();
+      expect(result.data).toHaveLength(1);
+      expect(result.total).toBe(1);
+      expect(result.page).toBe(1);
+      expect(result.totalPages).toBe(1);
+    });
+  });
 });
+
