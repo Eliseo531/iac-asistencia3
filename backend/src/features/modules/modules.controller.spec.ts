@@ -4,10 +4,13 @@ import { ExcelParserService } from './services/excel-parser.service';
 import { ScheduleParserService } from './services/schedule-parser.service';
 import { ExcelValidationException } from './exceptions/excel-validation.exception';
 
+import { ModulesService } from './services/modules.service';
+
 describe('ModulesController', () => {
   let controller: ModulesController;
   let excelParserService: ExcelParserService;
   let scheduleParserService: ScheduleParserService;
+  let modulesService: ModulesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,6 +28,12 @@ describe('ModulesController', () => {
             parseSchedulesExcel: jest.fn(),
           },
         },
+        {
+          provide: ModulesService,
+          useValue: {
+            previewModuleData: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -33,6 +42,7 @@ describe('ModulesController', () => {
     scheduleParserService = module.get<ScheduleParserService>(
       ScheduleParserService,
     );
+    modulesService = module.get<ModulesService>(ModulesService);
   });
 
   describe('importStudents', () => {
@@ -166,6 +176,98 @@ describe('ModulesController', () => {
         .mockResolvedValue(mockResult);
 
       await expect(controller.importSchedules(mockFile)).rejects.toThrow(
+        ExcelValidationException,
+      );
+    });
+  });
+
+  describe('previewModule', () => {
+    it('debe retornar ModulePreviewSummaryDto si ambos archivos son válidos (RF-16)', async () => {
+      const mockFiles = {
+        studentsFile: [
+          {
+            buffer: Buffer.from('students'),
+            originalname: 'estudiantes.xlsx',
+          } as Express.Multer.File,
+        ],
+        schedulesFile: [
+          {
+            buffer: Buffer.from('schedules'),
+            originalname: 'fechas.xlsx',
+          } as Express.Multer.File,
+        ],
+      };
+
+      const mockSummary = {
+        isValid: true,
+        canActivate: true,
+        totalStudents: 15,
+        totalSchedules: 4,
+        estimatedStartDate: '2026-10-05',
+        estimatedEndDate: '2026-10-15',
+        studentsPreview: [],
+        schedulesPreview: [],
+        validationErrors: {
+          studentsErrors: [],
+          schedulesErrors: [],
+        },
+      };
+
+      jest
+        .spyOn(modulesService, 'previewModuleData')
+        .mockResolvedValue(mockSummary);
+
+      const response = await controller.previewModule(mockFiles);
+      expect(response).toEqual(mockSummary);
+      expect(modulesService.previewModuleData).toHaveBeenCalledWith(
+        mockFiles.studentsFile[0].buffer,
+        mockFiles.schedulesFile[0].buffer,
+      );
+    });
+
+    it('debe lanzar ExcelValidationException si el resumen tiene isValid false', async () => {
+      const mockFiles = {
+        studentsFile: [
+          {
+            buffer: Buffer.from('students'),
+            originalname: 'estudiantes.xlsx',
+          } as Express.Multer.File,
+        ],
+        schedulesFile: [
+          {
+            buffer: Buffer.from('schedules'),
+            originalname: 'fechas.xlsx',
+          } as Express.Multer.File,
+        ],
+      };
+
+      const mockSummary = {
+        isValid: false,
+        canActivate: false,
+        totalStudents: 0,
+        totalSchedules: 0,
+        estimatedStartDate: '',
+        estimatedEndDate: '',
+        studentsPreview: [],
+        schedulesPreview: [],
+        validationErrors: {
+          studentsErrors: [
+            {
+              row: 2,
+              field: 'email',
+              value: '',
+              message: 'Correo inválido',
+            },
+          ],
+          schedulesErrors: [],
+        },
+      };
+
+      jest
+        .spyOn(modulesService, 'previewModuleData')
+        .mockResolvedValue(mockSummary);
+
+      await expect(controller.previewModule(mockFiles)).rejects.toThrow(
         ExcelValidationException,
       );
     });
