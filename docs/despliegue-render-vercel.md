@@ -57,7 +57,7 @@ Si prefieres crearlos paso a paso:
 2. Configuración:
    - **Name:** `asistencia-db`
    - **Database:** `asistencia_db`
-   - **User:** `postgres`
+   - **User:** `asistencia_user` (no usar nombres reservados como postgres)
    - **Region:** Selecciona la más cercana (ej. *Oregon* o *Ohio*).
    - **Plan:** Free o Starter.
 3. Haz clic en **Create Database**.
@@ -69,10 +69,10 @@ Si prefieres crearlos paso a paso:
 3. Configuración del servicio:
    - **Name:** `iac-asistencia-backend`
    - **Region:** La misma región elegida para la base de datos.
-   - **Branch:** `main`
+   - **Branch:** `develop` (o `main`)
    - **Root Directory:** `backend`
    - **Runtime:** `Node`
-   - **Build Command:** `npm install && npm run build`
+   - **Build Command:** `npm install --include=dev && npm run build`
    - **Start Command:** `npm run start:prod`
    - **Plan:** Free o Starter.
 4. En la sección **Environment Variables**, añade:
