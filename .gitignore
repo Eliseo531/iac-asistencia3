@@ -43,3 +43,8 @@ docs/planes/
 
 
 docs/prog2/
+
+# Agent skills (local only)
+.agents/skills/
+skills-lock.json
+
