@@ -4,8 +4,9 @@ import {
   OverrideAttendancePayload,
 } from '../types/admin-attendance.types';
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'
+).replace(/\/$/, '');
 
 export class AdminAttendanceService {
   private static getAdminToken(): string | null {
