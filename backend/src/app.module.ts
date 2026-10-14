@@ -9,6 +9,7 @@ import { ActivityLogsModule } from './features/activity-logs/activity-logs.modul
 import { AuthModule } from './features/auth/auth.module';
 import { ModulesModule } from './features/modules/modules.module';
 import { AttendancesModule } from './features/attendances/attendances.module';
+import { StudentsModule } from './features/students/students.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AttendancesModule } from './features/attendances/attendances.module';
     AuthModule,
     ModulesModule,
     AttendancesModule,
+    StudentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

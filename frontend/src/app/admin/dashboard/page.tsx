@@ -140,7 +140,16 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/admin/estudiantes"
+                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  <span>Ver Directorio de Alumnos (US-10)</span>
+                </Link>
                 <Link
                   href="/admin/modulo/importar"
                   className="px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-bold rounded-xl transition-all"
@@ -249,11 +258,11 @@ export default function AdminDashboardPage() {
               <span>🚀 Historias de Usuario Implementadas (Prog. 1)</span>
             </h2>
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-              21 Story Points Completados
+              24 Story Points Completados
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {/* US-01 Card */}
             <div className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
@@ -265,10 +274,10 @@ export default function AdminDashboardPage() {
                   <span className="text-xs text-zinc-400 font-mono">3 SP</span>
                 </div>
                 <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1">
-                  Login Administrador
+                  Login Admin
                 </h3>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
-                  JWT, Guards, sesión segura.
+                  JWT, Guards, sesión.
                 </p>
               </div>
               <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
@@ -290,10 +299,10 @@ export default function AdminDashboardPage() {
                   <span className="text-xs text-zinc-400 font-mono">5 SP</span>
                 </div>
                 <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1 group-hover:text-indigo-600 transition">
-                  Excel Estudiantes
+                  Excel Alumnos
                 </h3>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
-                  Parser y validación fila por fila.
+                  Parser y validación.
                 </p>
               </div>
               <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold flex items-center justify-between">
@@ -316,10 +325,10 @@ export default function AdminDashboardPage() {
                   <span className="text-xs text-zinc-400 font-mono">5 SP</span>
                 </div>
                 <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1 group-hover:text-emerald-600 transition">
-                  Excel Calendario
+                  Excel Fechas
                 </h3>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
-                  Fechas y horas cronológicas.
+                  Calendario y horas.
                 </p>
               </div>
               <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-between">
@@ -345,7 +354,7 @@ export default function AdminDashboardPage() {
                   Vista Previa
                 </h3>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
-                  Consolidación y KPIs del módulo.
+                  KPIs consolidados.
                 </p>
               </div>
               <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-blue-600 dark:text-blue-400 font-semibold flex items-center justify-between">
@@ -371,11 +380,37 @@ export default function AdminDashboardPage() {
                   Activación ACID
                 </h3>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
-                  Persistencia y archivado histórico.
+                  Transacción y archivo.
                 </p>
               </div>
               <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-between">
-                <span>Activar Módulo</span>
+                <span>Ver Módulo</span>
+                <span>→</span>
+              </div>
+            </Link>
+
+            {/* US-10 Card */}
+            <Link
+              href="/admin/estudiantes"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-400 dark:border-emerald-700 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+            >
+              <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    US-10 • FASE 2
+                  </span>
+                  <span className="text-xs text-zinc-400 font-mono">3 SP</span>
+                </div>
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1 group-hover:text-indigo-600 transition">
+                  Búsqueda Alumnos
+                </h3>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
+                  Nómina y debounce 300ms.
+                </p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold flex items-center justify-between">
+                <span>Directorio</span>
                 <span>→</span>
               </div>
             </Link>
@@ -391,7 +426,7 @@ export default function AdminDashboardPage() {
             <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60">
               <span className="block text-xs text-zinc-500 mb-0.5">Rama Git Activa</span>
               <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-xs">
-                feature/US-07-module-activation-archive
+                feature/US-10-students-search-directory
               </span>
             </div>
             <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60">
