@@ -519,8 +519,8 @@ export default function AdminDashboardPage() {
             </div>
             <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60">
               <span className="block text-xs text-zinc-500 mb-0.5">API Backend</span>
-              <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-                http://localhost:3000/api/v1
+              <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-semibold break-all">
+                {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'}
               </span>
             </div>
           </div>

@@ -31,9 +31,18 @@ export const AttendanceOverrideModal: React.FC<
     useAttendanceOverride(() => {
       setTimeout(() => {
         onSuccess();
-        handleClose();
+        setJustification('');
+        setValidationError(null);
+        onClose();
       }, 900);
     });
+
+  const handleClose = () => {
+    setJustification('');
+    setValidationError(null);
+    clearFeedback();
+    onClose();
+  };
 
   // Inicializar estado sugerido contrario al actual
   React.useEffect(() => {
@@ -46,13 +55,6 @@ export const AttendanceOverrideModal: React.FC<
   }, [row]);
 
   if (!isOpen || !row) return null;
-
-  const handleClose = () => {
-    setJustification('');
-    setValidationError(null);
-    clearFeedback();
-    onClose();
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

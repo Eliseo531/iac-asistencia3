@@ -27,16 +27,33 @@ const formatDate = (date: Date): string => {
 export async function runSeed() {
   console.log('🌱 [Paso Cero] Iniciando script de semilla (Database Seed)...');
 
-  const dataSource = new DataSource({
-    type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_NAME || 'asistencia_db',
-    entities: APP_ENTITIES,
-    synchronize: true, // Sincroniza esquema de tablas para entorno de desarrollo
-  });
+  const isLocal =
+    !process.env.DATABASE_URL ||
+    process.env.DATABASE_URL.includes('localhost') ||
+    process.env.DATABASE_URL.includes('127.0.0.1');
+  const enableSsl =
+    process.env.DB_SSL === 'true' || (!isLocal && !!process.env.DATABASE_URL);
+  const sslConfig = enableSsl ? { rejectUnauthorized: false } : false;
+
+  const dataSource = process.env.DATABASE_URL
+    ? new DataSource({
+        type: 'postgres',
+        url: process.env.DATABASE_URL,
+        entities: APP_ENTITIES,
+        synchronize: true,
+        ssl: sslConfig,
+      })
+    : new DataSource({
+        type: 'postgres',
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5432', 10),
+        username: process.env.DB_USERNAME || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres',
+        database: process.env.DB_NAME || 'asistencia_db',
+        entities: APP_ENTITIES,
+        synchronize: true,
+        ssl: sslConfig,
+      });
 
   await dataSource.initialize();
   console.log('✅ Conexión a la base de datos establecida.');
