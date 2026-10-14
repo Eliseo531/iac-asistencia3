@@ -32,6 +32,8 @@ describe('ModulesController', () => {
           provide: ModulesService,
           useValue: {
             previewModuleData: jest.fn(),
+            activateNewModule: jest.fn(),
+            getActiveModule: jest.fn(),
           },
         },
       ],
@@ -270,6 +272,76 @@ describe('ModulesController', () => {
       await expect(controller.previewModule(mockFiles)).rejects.toThrow(
         ExcelValidationException,
       );
+    });
+  });
+
+  describe('activateModule (US-07)', () => {
+    it('debe activar el módulo y retornar ActivatedModuleResponseDto (RF-14)', async () => {
+      const mockDto = {
+        name: 'Módulo 2: IaC',
+        code: 'DCID-V1E1-M2',
+        students: [
+          {
+            registrationNumber: '1001',
+            fullName: 'Juan Pérez',
+            email: 'juan@gmail.com',
+            rowNumber: 2,
+          },
+        ],
+        schedules: [
+          {
+            classDate: '2026-10-05',
+            startTime: '18:00',
+            endTime: '21:00',
+            rowNumber: 2,
+          },
+        ],
+      };
+
+      const mockResponse = {
+        id: 'new-id',
+        name: 'Módulo 2: IaC',
+        code: 'DCID-V1E1-M2',
+        status: 'ACTIVE' as any,
+        startDate: '2026-10-05',
+        endDate: '2026-10-05',
+        studentsCount: 1,
+        schedulesCount: 1,
+        archivedPreviousModuleInfo: 'Módulo 1 archivado',
+        message: 'Módulo activado exitosamente',
+      };
+
+      jest
+        .spyOn(modulesService, 'activateNewModule')
+        .mockResolvedValue(mockResponse);
+
+      const adminUser = { id: 'admin-id', email: 'admin@sistema.com' };
+      const req = { ip: '127.0.0.1' };
+
+      const result = await controller.activateModule(mockDto, adminUser, req);
+      expect(result).toEqual(mockResponse);
+      expect(modulesService.activateNewModule).toHaveBeenCalledWith(
+        mockDto,
+        adminUser,
+        req.ip,
+      );
+    });
+  });
+
+  describe('getActiveModule', () => {
+    it('debe retornar el módulo activo', async () => {
+      const mockActive = {
+        id: 'active-id',
+        name: 'Módulo Piloto',
+        status: 'ACTIVE' as any,
+      };
+
+      jest
+        .spyOn(modulesService, 'getActiveModule')
+        .mockResolvedValue(mockActive as any);
+
+      const result = await controller.getActiveModule();
+      expect(result).toEqual(mockActive);
     });
   });
 });

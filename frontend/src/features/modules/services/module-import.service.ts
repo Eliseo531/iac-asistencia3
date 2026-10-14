@@ -1,6 +1,10 @@
 import { StudentImportValidationResult } from '../types/module-import.types';
 import { ScheduleValidationResult } from '../types/schedule-import.types';
-import { ModulePreviewSummary } from '../types/module-preview.types';
+import {
+  ActivateModulePayload,
+  ActivatedModuleResult,
+  ModulePreviewSummary,
+} from '../types/module-preview.types';
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
@@ -24,6 +28,12 @@ export interface PreviewModuleResponse {
   message: string;
   data?: ModulePreviewSummary;
   errorData?: ModulePreviewSummary;
+}
+
+export interface ActivateModuleResponse {
+  success: boolean;
+  message: string;
+  data?: ActivatedModuleResult;
 }
 
 export class ModuleImportService {
@@ -163,6 +173,68 @@ export class ModuleImportService {
         message:
           'Error de conexión con el servidor. Verifique que la API esté activa.',
       };
+    }
+  }
+
+  /**
+   * Activa el nuevo módulo académico en base de datos con transacción ACID (US-07, RF-14, RN-01, RN-08)
+   */
+  static async activateModule(
+    payload: ActivateModulePayload,
+    token: string,
+  ): Promise<ActivateModuleResponse> {
+    try {
+      const response = await fetch(`${API_URL}/modules/activate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          message:
+            json.message ||
+            'Error al activar el módulo académico en base de datos.',
+        };
+      }
+
+      return {
+        success: true,
+        message:
+          json.message || 'Módulo académico activado exitosamente.',
+        data: json.data || json,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message:
+          'Error de conexión con el servidor. No se pudo completar la activación.',
+      };
+    }
+  }
+
+  /**
+   * Consulta el módulo académico activo actual (RN-01)
+   */
+  static async getActiveModule(token: string): Promise<any> {
+    try {
+      const response = await fetch(`${API_URL}/modules/active`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const json = await response.json();
+      return json.data || json;
+    } catch {
+      return null;
     }
   }
 }

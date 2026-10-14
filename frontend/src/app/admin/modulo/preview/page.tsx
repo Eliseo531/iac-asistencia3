@@ -29,6 +29,7 @@ export default function ModulePreviewPage() {
     setIsConfirmationOpen,
     isActivating,
     activationSuccess,
+    activatedModuleData,
     errorMessage,
     activateModule,
   } = useModuleImportWizard();
@@ -92,8 +93,8 @@ export default function ModulePreviewPage() {
         {/* Notificación de Éxito al Activar */}
         {activationSuccess && (
           <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-900 shadow-sm space-y-4 animate-in fade-in duration-200">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -108,13 +109,30 @@ export default function ModulePreviewPage() {
                   />
                 </svg>
               </div>
-              <div>
+              <div className="space-y-1">
                 <h3 className="text-base font-bold text-emerald-900">
-                  ¡Módulo Académico Activado Exitosamente!
+                  ¡Módulo Académico Activado y Persistido en Base de Datos!
                 </h3>
-                <p className="text-xs text-emerald-700 mt-0.5">
-                  El módulo &quot;{metadata.name}&quot; ({metadata.code}) se ha establecido como el módulo activo en el sistema.
+                <p className="text-xs text-emerald-700">
+                  El módulo &quot;{activatedModuleData?.name || metadata.name}&quot; (
+                  <span className="font-mono font-bold">
+                    {activatedModuleData?.code || metadata.code}
+                  </span>
+                  ) ha quedado registrado como el único módulo <strong className="font-semibold text-emerald-900">ACTIVO</strong> del sistema (RN-01).
                 </p>
+                <div className="text-xs text-emerald-800 font-medium pt-1 flex flex-wrap gap-4">
+                  <span>👥 Estudiantes matriculados: <strong>{activatedModuleData?.studentsCount ?? students.length}</strong></span>
+                  <span>📅 Clases programadas: <strong>{activatedModuleData?.schedulesCount ?? schedules.length}</strong></span>
+                  <span>⏳ Rango: <strong>{activatedModuleData?.startDate || estimatedStartDate}</strong> al <strong>{activatedModuleData?.endDate || estimatedEndDate}</strong></span>
+                </div>
+                {activatedModuleData?.archivedPreviousModuleInfo && (
+                  <div className="mt-2 p-2.5 bg-emerald-100/70 rounded-xl border border-emerald-200 text-emerald-900 text-xs flex items-center gap-2">
+                    <svg className="w-4 h-4 text-emerald-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                    <span><strong>Preservación Histórica (RN-08):</strong> {activatedModuleData.archivedPreviousModuleInfo}.</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -274,7 +292,7 @@ export default function ModulePreviewPage() {
           totalStudents={students.length}
           totalSchedules={schedules.length}
           onClose={() => setIsConfirmationOpen(false)}
-          onConfirm={activateModule}
+          onConfirm={() => activateModule(token || undefined)}
           isSubmitting={isActivating}
         />
       </div>

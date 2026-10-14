@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/features/auth/services/auth.service';
 import { AuthUser } from '@/features/auth/types/auth.types';
+import { ModuleImportService } from '@/features/modules/services/module-import.service';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [activeModule, setActiveModule] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -22,6 +24,11 @@ export default function AdminDashboardPage() {
 
     setUser(storedUser);
     setIsLoading(false);
+
+    // Cargar módulo activo desde la API
+    ModuleImportService.getActiveModule(token).then((mod) => {
+      if (mod) setActiveModule(mod);
+    });
   }, [router]);
 
   const handleLogout = () => {
@@ -91,17 +98,59 @@ export default function AdminDashboardPage() {
                 Autenticación Exitosa • Token JWT Válido
               </span>
               <span className="px-3 py-1 bg-emerald-400/25 border border-emerald-300/40 rounded-full text-xs font-semibold text-emerald-200">
-                Fase 1 Completada (16 / 16 SP)
+                Fase 2 Iniciada • US-07 Activada
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
               Bienvenido, {user?.username || 'Administrador'}
             </h1>
             <p className="mt-2 text-indigo-100 text-sm sm:text-base leading-relaxed">
-              Estás en la rama <strong className="text-white underline decoration-indigo-300">develop</strong>. Todas las funcionalidades del Programador 1 (US-01, US-04, US-05 y US-06) están implementadas, validadas y listas para su uso a través del asistente de módulos.
+              Sistema de control de asistencia. La activación transaccional con preservación histórica (US-07) está implementada con integridad ACID sobre PostgreSQL.
             </p>
           </div>
         </div>
+
+        {/* Módulo Activo Actual (RN-01, RN-08) */}
+        {activeModule && (
+          <div className="rounded-2xl bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-emerald-800/60 p-6 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                      Módulo Activo en Sistema (RN-01)
+                    </span>
+                    <span className="text-xs font-mono font-bold text-zinc-500">
+                      {activeModule.code}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                    {activeModule.name}
+                  </h3>
+                  <div className="flex flex-wrap gap-4 text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                    <span>👥 Alumnos matriculados: <strong>{activeModule.students?.length ?? 0}</strong></span>
+                    <span>📅 Sesiones de clase: <strong>{activeModule.schedules?.length ?? 0}</strong></span>
+                    <span>⏳ Período: <strong>{activeModule.startDate}</strong> al <strong>{activeModule.endDate}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Link
+                  href="/admin/modulo/importar"
+                  className="px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-bold rounded-xl transition-all"
+                >
+                  Reemplazar / Nuevo Ciclo
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Sección de Gestión y Acciones de Módulos (Acceso Principal) */}
         <div className="rounded-2xl bg-white dark:bg-zinc-900 border border-indigo-100 dark:border-indigo-950/50 p-6 sm:p-8 shadow-sm">
@@ -180,11 +229,11 @@ export default function AdminDashboardPage() {
                   3
                 </div>
                 <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-indigo-600 transition">
-                  Paso 3: Vista Previa
+                  Paso 3: Vista Previa y Activación
                 </h3>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Revisión consolidada de datos antes de confirmar y activar (US-06).
+                Revisión consolidada y activación con transacción ACID (US-06 / US-07).
               </p>
               <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-3 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                 Abrir Paso 3 →
@@ -193,65 +242,62 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Sección de historias de usuario de la Fase 1 */}
+        {/* Sección de historias de usuario del Programador 1 */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
-              <span>🚀 Historias de Usuario Implementadas (Fase 1 - 100%)</span>
+              <span>🚀 Historias de Usuario Implementadas (Prog. 1)</span>
             </h2>
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-              16 / 16 Story Points
+              21 Story Points Completados
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* US-01 Card */}
-            <div className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+            <div className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                    US-01 • IMPLEMENTADA
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    US-01 • FASE 1
                   </span>
                   <span className="text-xs text-zinc-400 font-mono">3 SP</span>
                 </div>
-                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm mb-1">
-                  Acceso de Administrador
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1">
+                  Login Administrador
                 </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  Login seguro con JWT, Guards, persistencia de sesión y control de acceso.
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
+                  JWT, Guards, sesión segura.
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Sesión activa
+              <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                ✓ Implementada
               </div>
             </div>
 
             {/* US-04 Card */}
             <Link
               href="/admin/modulo/importar"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
             >
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                    US-04 • IMPLEMENTADA
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    US-04 • FASE 1
                   </span>
                   <span className="text-xs text-zinc-400 font-mono">5 SP</span>
                 </div>
-                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm mb-1 group-hover:text-indigo-600 transition">
-                  Importación de Estudiantes
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1 group-hover:text-indigo-600 transition">
+                  Excel Estudiantes
                 </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  Carga Excel, validación de matrícula única, detección de errores fila por fila.
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
+                  Parser y validación fila por fila.
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs text-indigo-600 dark:text-indigo-400 font-semibold flex items-center justify-between">
-                <span>Ir a Importar Estudiantes</span>
+              <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold flex items-center justify-between">
+                <span>Abrir</span>
                 <span>→</span>
               </div>
             </Link>
@@ -259,25 +305,25 @@ export default function AdminDashboardPage() {
             {/* US-05 Card */}
             <Link
               href="/admin/modulo/importar/fechas"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
             >
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                    US-05 • IMPLEMENTADA
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    US-05 • FASE 1
                   </span>
                   <span className="text-xs text-zinc-400 font-mono">5 SP</span>
                 </div>
-                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm mb-1 group-hover:text-emerald-600 transition">
-                  Importación de Calendario
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1 group-hover:text-emerald-600 transition">
+                  Excel Calendario
                 </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  Carga Excel de fechas y horas 24h, validación cronológica y unicidad de fecha.
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
+                  Fechas y horas cronológicas.
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-between">
-                <span>Ir a Calendario</span>
+              <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-between">
+                <span>Abrir</span>
                 <span>→</span>
               </div>
             </Link>
@@ -285,25 +331,51 @@ export default function AdminDashboardPage() {
             {/* US-06 Card */}
             <Link
               href="/admin/modulo/preview"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
             >
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                    US-06 • IMPLEMENTADA
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    US-06 • FASE 1
                   </span>
                   <span className="text-xs text-zinc-400 font-mono">3 SP</span>
                 </div>
-                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm mb-1 group-hover:text-blue-600 transition">
-                  Vista Previa y Activación
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1 group-hover:text-blue-600 transition">
+                  Vista Previa
                 </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  Consolidación de nómina y calendario, KPIs, metadatos y confirmación de activación.
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
+                  Consolidación y KPIs del módulo.
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs text-blue-600 dark:text-blue-400 font-semibold flex items-center justify-between">
-                <span>Ir a Vista Previa</span>
+              <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-blue-600 dark:text-blue-400 font-semibold flex items-center justify-between">
+                <span>Abrir</span>
+                <span>→</span>
+              </div>
+            </Link>
+
+            {/* US-07 Card */}
+            <Link
+              href="/admin/modulo/preview"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-400 dark:border-emerald-700 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+            >
+              <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    US-07 • FASE 2
+                  </span>
+                  <span className="text-xs text-zinc-400 font-mono">5 SP</span>
+                </div>
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1 group-hover:text-emerald-600 transition">
+                  Activación ACID
+                </h3>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
+                  Persistencia y archivado histórico.
+                </p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-between">
+                <span>Activar Módulo</span>
                 <span>→</span>
               </div>
             </Link>
@@ -319,7 +391,7 @@ export default function AdminDashboardPage() {
             <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60">
               <span className="block text-xs text-zinc-500 mb-0.5">Rama Git Activa</span>
               <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-xs">
-                develop (origin/develop)
+                feature/US-07-module-activation-archive
               </span>
             </div>
             <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60">
