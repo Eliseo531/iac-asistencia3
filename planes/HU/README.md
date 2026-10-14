@@ -23,9 +23,9 @@ Este directorio contiene las especificaciones técnicas completas de arquitectur
 
 | Historia | Título | Requerimientos | Story Points | Prioridad | Plan Detallado |
 | :---: | :--- | :---: | :---: | :---: | :--- |
-| **US-07** | Activación de Nuevo Módulo con Archivado Histórico | `RF-13`, `RF-14`, `RF-15`, `RN-01`, `RN-08` | 5 SP | Must Have | [Ver Plan Técnico US-07](US-07-activacion-modulo-archivado.md) |
-| **US-10** | Consulta y Búsqueda de Estudiantes Activos | `RF-06` | 3 SP | Must Have | [Ver Plan Técnico US-10](US-10-consulta-busqueda-estudiantes.md) |
-| **US-03** | Cierre de Sesión y Control de Acceso por Roles (Guards) | `RF-02` | 2 SP | Must Have | [Ver Plan Técnico US-03](US-03-cierre-sesion-guards.md) |
+| **US-07** | Activación de Nuevo Módulo con Archivado Histórico | `RF-13`, `RF-14`, `RF-15`, `RN-01`, `RN-08` | 5 SP | ✅ Implementada | [Ver Plan Técnico US-07](US-07-activacion-modulo-archivado.md) |
+| **US-10** | Consulta y Búsqueda de Estudiantes Activos | `RF-06` | 3 SP | ✅ Implementada | [Ver Plan Técnico US-10](US-10-consulta-busqueda-estudiantes.md) |
+| **US-03** | Cierre de Sesión y Control de Acceso por Roles (Guards) | `RF-02` | 2 SP | Must Have (Siguiente) | [Ver Plan Técnico US-03](US-03-cierre-sesion-guards.md) |
 
 * **Total Fase 2:** **10 Story Points**.
 
