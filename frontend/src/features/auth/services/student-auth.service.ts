@@ -20,6 +20,7 @@ export const studentAuthService = {
     if (typeof window !== 'undefined') {
       localStorage.setItem(TOKEN_KEY, data.token);
       localStorage.setItem(SESSION_KEY, JSON.stringify(data));
+      document.cookie = `student_token=${encodeURIComponent(data.token)}; path=/; max-age=86400; SameSite=Lax`;
     }
 
     return data;
@@ -49,5 +50,6 @@ export const studentAuthService = {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(SESSION_KEY);
+    document.cookie = 'student_token=; path=/; max-age=0; SameSite=Lax';
   },
 };

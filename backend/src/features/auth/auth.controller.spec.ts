@@ -21,6 +21,7 @@ describe('AuthController', () => {
     authService = {
       loginAdmin: jest.fn().mockResolvedValue(mockAuthResponse),
       getProfile: jest.fn().mockResolvedValue(mockAuthResponse.user),
+      logout: jest.fn().mockResolvedValue({ message: 'Sesión cerrada exitosamente' }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -80,4 +81,24 @@ describe('AuthController', () => {
       });
     });
   });
+
+  describe('POST auth/logout', () => {
+    it('debe llamar a authService.logout y retornar mensaje de confirmación', async () => {
+      const mockReq: any = {
+        headers: {},
+        socket: { remoteAddress: '127.0.0.1' },
+      };
+
+      const result = await controller.logout({ userId: 'uuid-1' }, mockReq);
+
+      expect(authService.logout).toHaveBeenCalledWith(
+        { userId: 'uuid-1' },
+        '127.0.0.1',
+      );
+      expect(result).toEqual({
+        message: 'Sesión cerrada exitosamente',
+      });
+    });
+  });
 });
+

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, Matches } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 
 export class ScheduleRowDto {
   @ApiProperty({
@@ -38,7 +38,9 @@ export class ScheduleRowDto {
   @ApiProperty({
     example: 2,
     description: 'Número de fila en el archivo Excel origen',
+    required: false,
   })
+  @IsOptional()
   @IsNumber()
-  rowNumber: number;
+  rowNumber?: number;
 }

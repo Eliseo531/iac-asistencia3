@@ -18,6 +18,7 @@ import { Request } from 'express';
 import { UserRole } from '../../common/enums';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { Public } from './decorators/public.decorator';
 import { Roles } from './decorators/roles.decorator';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AuthResponseDataDto } from './dto/auth-response.dto';
@@ -29,6 +30,7 @@ import { RolesGuard } from './guards/roles.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('admin/login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -102,4 +104,26 @@ export class AuthController {
       data: profile,
     };
   }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Cerrar sesión de Administrador / Usuario (RF-02, US-03)',
+    description:
+      'Invalida la sesión activa y registra el evento inmutable de cierre de sesión en la bitácora de auditoría.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Sesión cerrada exitosamente',
+  })
+  async logout(
+    @CurrentUser() user: any,
+    @Req() req: Request,
+  ): Promise<{ message: string }> {
+    const ipAddress =
+      (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+
+    return this.authService.logout(user, ipAddress);
+  }
 }
+

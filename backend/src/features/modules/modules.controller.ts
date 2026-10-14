@@ -1,7 +1,10 @@
 import {
+  Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
+  Req,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -20,12 +23,15 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserRole } from '../../common/enums';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { StudentImportValidationResultDto } from './dto/import-validation-result.dto';
 import { ScheduleValidationResultDto } from './dto/schedule-validation-result.dto';
 import { ModulePreviewSummaryDto } from './dto/module-preview-summary.dto';
+import { ActivateModuleDto } from './dto/activate-module.dto';
+import { ActivatedModuleResponseDto } from './dto/activated-module-response.dto';
 import { ExcelValidationException } from './exceptions/excel-validation.exception';
 import { ExcelParserService } from './services/excel-parser.service';
 import { ScheduleParserService } from './services/schedule-parser.service';
@@ -225,5 +231,53 @@ export class ModulesController {
     }
 
     return summary;
+  }
+
+  @Post('activate')
+  @ApiOperation({
+    summary:
+      'Activar un nuevo módulo académico con transacción ACID y archivado histórico (RF-13, RF-14, RF-15, RN-01, RN-08)',
+    description:
+      'Archiva atómicamente el módulo activo anterior e inserta el nuevo módulo activo junto con sus estudiantes y calendario de fechas en una sola transacción reversible.',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Módulo académico activado exitosamente.',
+    type: ActivatedModuleResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Datos inválidos, código de módulo duplicado o listas de estudiantes/fechas vacías.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'No autorizado. Se requiere token JWT administrativo.',
+  })
+  async activateModule(
+    @Body() dto: ActivateModuleDto,
+    @CurrentUser() adminUser: any,
+    @Req() req: any,
+  ): Promise<ActivatedModuleResponseDto> {
+    return this.modulesService.activateNewModule(dto, adminUser, req?.ip);
+  }
+
+  @Get('active')
+  @ApiOperation({
+    summary:
+      'Obtener información del módulo académico actualmente activo (RN-01)',
+    description:
+      'Retorna los datos del módulo actualmente activo, incluyendo nómina de estudiantes matriculados y calendario de fechas de clase.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Módulo activo recuperado exitosamente.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'No autorizado. Se requiere token JWT administrativo.',
+  })
+  async getActiveModule() {
+    return this.modulesService.getActiveModule();
   }
 }

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
+import { Public } from './decorators/public.decorator';
 import { StudentAuthService } from './student-auth.service';
 import { StudentLoginDto } from './dto/student-login.dto';
 
@@ -16,6 +17,7 @@ import { StudentLoginDto } from './dto/student-login.dto';
 export class StudentAuthController {
   constructor(private readonly studentAuthService: StudentAuthService) {}
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
