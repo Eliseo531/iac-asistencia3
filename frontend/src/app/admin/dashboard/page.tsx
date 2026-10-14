@@ -247,6 +247,67 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
+        {/* Sección de Supervisión, Asistencias y Auditoría (Fase 2 - Programador 2) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Card Asistencias (US-11, US-12) */}
+          <div className="rounded-2xl bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-emerald-950/60 p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                  Control en Vivo • Fase 2
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
+                  US-11 / US-12
+                </span>
+              </div>
+              <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                Planilla General de Asistencias
+              </h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                Visualiza la matriz de asistencias con filtros por fecha o alumno, contadores de presentes y faltas calculadas, y modificación manual justificada (RN-06, RN-07).
+              </p>
+            </div>
+
+            <div className="mt-5">
+              <Link
+                href="/admin/asistencias"
+                className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all hover:scale-[1.01]"
+              >
+                <span>Abrir Planilla de Asistencias →</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Card Auditoría (US-15) */}
+          <div className="rounded-2xl bg-white dark:bg-zinc-900 border border-indigo-200 dark:border-indigo-950/60 p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                  Trazabilidad • Fase 2
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300">
+                  US-15
+                </span>
+              </div>
+              <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                Bitácora Centralizada de Auditoría
+              </h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                Historial inmutable de eventos críticos: inicios de sesión, marcas de alumnos, importaciones y trazabilidad con diff de cambios (RF-10, US-14, US-15).
+              </p>
+            </div>
+
+            <div className="mt-5">
+              <Link
+                href="/admin/auditoria"
+                className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all hover:scale-[1.01]"
+              >
+                <span>Consultar Bitácora de Auditoría →</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Sección de historias de usuario del Programador 1 */}
         <div>
           <div className="flex items-center justify-between mb-4">

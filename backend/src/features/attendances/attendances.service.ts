@@ -1,11 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { ClassSchedule } from '../schedules/entities/class-schedule.entity';
 import { AcademicModule } from '../modules/entities/academic-module.entity';
+import { Student } from '../students/entities/student.entity';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { TodayStatusResponseDto } from './dto/today-status.dto';
+import { AttendanceMatrixQueryDto } from './dto/attendance-matrix-query.dto';
+import { AttendanceMatrixResponseDto } from './dto/attendance-matrix-response.dto';
+import { OverrideAttendanceDto } from './dto/override-attendance.dto';
 import { NotClassDayException } from './exceptions/not-class-day.exception';
 import { AlreadyMarkedAttendanceException } from './exceptions/already-marked-attendance.exception';
 import {
@@ -26,6 +30,8 @@ export class AttendancesService {
     private readonly scheduleRepository: Repository<ClassSchedule>,
     @InjectRepository(AcademicModule)
     private readonly moduleRepository: Repository<AcademicModule>,
+    @InjectRepository(Student)
+    private readonly studentRepository: Repository<Student>,
     private readonly activityLogsService: ActivityLogsService,
   ) {}
 
@@ -267,5 +273,245 @@ export class AttendancesService {
       sessions,
     };
   }
+
+  /**
+   * Consulta la planilla general y matriz de asistencias con filtros por fecha o estudiante (RF-08, US-11)
+   */
+  async getAdminMatrix(
+    query: AttendanceMatrixQueryDto,
+  ): Promise<AttendanceMatrixResponseDto> {
+    const today = this.getTodayString();
+
+    // 1. Obtener el módulo académico activo
+    const activeModule = await this.moduleRepository.findOne({
+      where: { status: ModuleStatus.ACTIVE },
+    });
+
+    if (!activeModule) {
+      throw new NotFoundException(
+        'No se encontró ningún módulo académico activo.',
+      );
+    }
+
+    // 2. Obtener todas las fechas de clase del módulo
+    const allSchedules = await this.scheduleRepository.find({
+      where: { moduleId: activeModule.id },
+      order: { classDate: 'ASC' },
+    });
+
+    // 3. Obtener todos los estudiantes inscritos
+    const allStudents = await this.studentRepository.find({
+      where: { moduleId: activeModule.id },
+      order: { fullName: 'ASC' },
+    });
+
+    // 4. Aplicar filtros si fueron provistos
+    let filteredSchedules = allSchedules;
+    if (query.classDate && query.classDate !== 'ALL') {
+      filteredSchedules = allSchedules.filter(
+        (s) => s.classDate === query.classDate,
+      );
+    }
+
+    let filteredStudents = allStudents;
+    if (query.studentId && query.studentId !== 'ALL') {
+      filteredStudents = allStudents.filter((s) => s.id === query.studentId);
+    }
+
+    // 5. Obtener todas las asistencias registradas para el módulo
+    const attendances = await this.attendanceRepository
+      .createQueryBuilder('attendance')
+      .innerJoin('attendance.classSchedule', 'schedule')
+      .where('schedule.moduleId = :moduleId', { moduleId: activeModule.id })
+      .getMany();
+
+    const attendanceMap = new Map<string, Attendance>();
+    for (const att of attendances) {
+      attendanceMap.set(`${att.studentId}_${att.classScheduleId}`, att);
+    }
+
+    // 6. Construir filas de la matriz y calcular métricas agregadas
+    let totalPresent = 0;
+    let totalAbsent = 0;
+
+    const rows = [];
+
+    for (const student of filteredStudents) {
+      for (const schedule of filteredSchedules) {
+        const key = `${student.id}_${schedule.id}`;
+        const att = attendanceMap.get(key);
+
+        let status: AttendanceStatus;
+        let markedAt: Date | null = null;
+        let markedByRole: UserRole | null = null;
+        let remarks: string | null = null;
+        let attendanceId: string | null = null;
+
+        if (att) {
+          status = att.status;
+          markedAt = att.markedAt;
+          markedByRole = att.markedByRole;
+          remarks = att.remarks;
+          attendanceId = att.id;
+
+          if (att.status === AttendanceStatus.PRESENTE) {
+            totalPresent++;
+          } else {
+            totalAbsent++;
+          }
+        } else {
+          // Si no hay registro físico:
+          // RN-05: Si la fecha es pasada o hoy, se infiere FALTA
+          status = AttendanceStatus.FALTA;
+          if (schedule.classDate <= today) {
+            totalAbsent++;
+          }
+        }
+
+        rows.push({
+          attendanceId,
+          studentId: student.id,
+          registrationNumber: student.registrationNumber,
+          studentName: student.fullName,
+          classScheduleId: schedule.id,
+          classDate: schedule.classDate,
+          timeRange: `${schedule.startTime} - ${schedule.endTime}`,
+          status,
+          markedAt,
+          markedByRole,
+          remarks,
+        });
+      }
+    }
+
+    const totalEvaluated = totalPresent + totalAbsent;
+    const attendancePercentage =
+      totalEvaluated > 0
+        ? Math.round((totalPresent / totalEvaluated) * 1000) / 10
+        : 0;
+
+    return {
+      moduleName: activeModule.name,
+      moduleId: activeModule.id,
+      summary: {
+        totalStudents: allStudents.length,
+        totalClasses: allSchedules.length,
+        totalPresent,
+        totalAbsent,
+        attendancePercentage,
+      },
+      schedules: allSchedules.map((s) => ({
+        id: s.id,
+        classDate: s.classDate,
+        startTime: s.startTime,
+        endTime: s.endTime,
+      })),
+      students: allStudents.map((st) => ({
+        id: st.id,
+        registrationNumber: st.registrationNumber,
+        fullName: st.fullName,
+        email: st.email,
+      })),
+      rows,
+    };
+  }
+
+  /**
+   * Modificación manual de asistencia por un administrador con auditoría obligatoria (RF-07, RN-06, RN-07, US-12)
+   */
+  async overrideAttendance(
+    dto: OverrideAttendanceDto,
+    adminUser: { id?: string; sub?: string; email?: string; username?: string },
+  ): Promise<Attendance> {
+    const activeModule = await this.moduleRepository.findOne({
+      where: { status: ModuleStatus.ACTIVE },
+    });
+
+    if (!activeModule) {
+      throw new NotFoundException(
+        'No se encontró ningún módulo académico activo.',
+      );
+    }
+
+    const student = await this.studentRepository.findOne({
+      where: { id: dto.studentId, moduleId: activeModule.id },
+    });
+    if (!student) {
+      throw new NotFoundException(
+        'El estudiante especificado no pertenece al módulo activo.',
+      );
+    }
+
+    const schedule = await this.scheduleRepository.findOne({
+      where: { id: dto.classScheduleId, moduleId: activeModule.id },
+    });
+    if (!schedule) {
+      throw new NotFoundException(
+        'La fecha de clase especificada no pertenece al módulo activo.',
+      );
+    }
+
+    // Buscar si ya existía una marca
+    let attendance = await this.attendanceRepository.findOne({
+      where: {
+        studentId: dto.studentId,
+        classScheduleId: dto.classScheduleId,
+      },
+    });
+
+    const previousValue = attendance
+      ? { status: attendance.status, remarks: attendance.remarks }
+      : { status: 'FALTA (INFERIDA)', remarks: null };
+
+    const adminIdentifier =
+      adminUser.email || adminUser.username || adminUser.sub || 'admin';
+    const adminId = adminUser.id || adminUser.sub || null;
+
+    if (attendance) {
+      attendance.status = dto.status;
+      attendance.remarks = dto.justification;
+      attendance.markedByRole = UserRole.ADMIN;
+      attendance.markedByUserId = adminId;
+      attendance.markedAt = new Date();
+    } else {
+      attendance = this.attendanceRepository.create({
+        studentId: dto.studentId,
+        classScheduleId: dto.classScheduleId,
+        status: dto.status,
+        remarks: dto.justification,
+        markedByRole: UserRole.ADMIN,
+        markedByUserId: adminId,
+        markedAt: new Date(),
+      });
+    }
+
+    const savedAttendance = await this.attendanceRepository.save(attendance);
+
+    // Registro inmutable en bitácora de auditoría (RN-07)
+    await this.activityLogsService.createLog({
+      moduleId: activeModule.id,
+      userId: adminId,
+      userIdentifier: adminIdentifier,
+      userRole: UserRole.ADMIN,
+      action: ActivityAction.UPDATE_ATTENDANCE,
+      entityAffected: 'Attendance',
+      entityId: savedAttendance.id,
+      previousValue,
+      newValue: {
+        status: dto.status,
+        remarks: dto.justification,
+        studentName: student.fullName,
+        classDate: schedule.classDate,
+        modifiedBy: adminIdentifier,
+      },
+    });
+
+    this.logger.log(
+      `[AdminOverride] Asistencia de estudiante ${student.fullName} (${schedule.classDate}) actualizada a ${dto.status} por ${adminIdentifier}`,
+    );
+
+    return savedAttendance;
+  }
 }
+
 
