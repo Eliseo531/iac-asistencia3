@@ -1,7 +1,7 @@
 databases:
   - name: asistencia-db
     databaseName: asistencia_db
-    user: postgres
+    user: asistencia_user
     plan: free
     region: oregon
 
