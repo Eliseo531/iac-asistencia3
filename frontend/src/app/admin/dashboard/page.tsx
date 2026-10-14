@@ -100,6 +100,18 @@ export default function AdminDashboardPage() {
                 Directorio de Alumnos
               </Link>
               <Link
+                href="/admin/asistencias"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition"
+              >
+                Matriz de Asistencias
+              </Link>
+              <Link
+                href="/admin/auditoria"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition"
+              >
+                Bitácora de Auditoría
+              </Link>
+              <Link
                 href="/admin/modulo/importar"
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition"
               >
@@ -358,10 +370,13 @@ export default function AdminDashboardPage() {
                 Supervisión del registro diario de asistencia de los estudiantes durante cada sesión programada con cálculo automático de asistencias y faltas.
               </p>
             </div>
-            <div className="mt-6 text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Monitoreo Activo de Sesiones</span>
-            </div>
+            <Link
+              href="/admin/asistencias"
+              className="mt-6 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-900 transition"
+            >
+              <span>Abrir Matriz de Asistencias</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
 
           <div className="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-slate-900/5 border-t-4 border-t-slate-800 flex flex-col justify-between">
@@ -374,19 +389,13 @@ export default function AdminDashboardPage() {
                 Transacciones protegidas con registro histórico inmutable. Cada activación de módulo y registro de asistencia queda auditado en la base de datos.
               </p>
             </div>
-            <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60">
-              <span className="block text-xs text-zinc-500 mb-0.5">Correo Electrónico</span>
-              <span className="font-semibold">{user?.email || 'admin@sistema.com'}</span>
-            </div>
-            <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60">
-              <span className="block text-xs text-zinc-500 mb-0.5">API Backend</span>
-              <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-semibold break-all">
-                {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'}
-              </span>
-            <div className="mt-6 text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Base de Datos Auditada</span>
-            </div>
+            <Link
+              href="/admin/auditoria"
+              className="mt-6 inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 transition"
+            >
+              <span>Ver Bitácora de Auditoría</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       </main>
