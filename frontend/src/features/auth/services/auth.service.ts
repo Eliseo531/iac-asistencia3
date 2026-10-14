@@ -42,7 +42,21 @@ export const authService = {
     }
   },
 
-  logoutAdmin(): void {
+  async logoutAdmin(): Promise<void> {
+    const token = this.getStoredToken();
+    if (token) {
+      try {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).catch(() => {});
+      } catch {
+        // Fallback silencioso si no hay conexión
+      }
+    }
+
     if (typeof window !== 'undefined') {
       localStorage.removeItem('admin_token');
       localStorage.removeItem('admin_user');

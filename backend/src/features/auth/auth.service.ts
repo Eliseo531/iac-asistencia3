@@ -126,4 +126,29 @@ export class AuthService {
       role: admin.role,
     };
   }
+
+  /**
+   * Cierra la sesión activa y registra el evento inmutable de cierre de sesión (US-03, RF-02).
+   */
+  async logout(user?: any, ipAddress?: string): Promise<{ message: string }> {
+    if (user?.userId || user?.sub) {
+      try {
+        const log = this.activityLogRepository.create({
+          userId: user.userId || user.sub,
+          userIdentifier: user.username || user.email || 'admin',
+          userRole: user.role || UserRole.ADMIN,
+          action: ActivityAction.LOGOUT,
+          entityAffected: 'Session',
+          entityId: user.userId || user.sub,
+          ipAddress: ipAddress ?? null,
+        });
+        await this.activityLogRepository.save(log);
+      } catch (auditError) {
+        this.logger.error('Error al registrar auditoría de logout', auditError);
+      }
+    }
+
+    return { message: 'Sesión cerrada exitosamente' };
+  }
 }
+

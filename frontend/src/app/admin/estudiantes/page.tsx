@@ -12,6 +12,7 @@ import {
 } from '@/features/students/types/student.types';
 import { StudentSearchBar } from '@/features/students/components/StudentSearchBar';
 import { ActiveStudentsTable } from '@/features/students/components/ActiveStudentsTable';
+import { LogoutConfirmButton } from '@/features/auth/components/LogoutConfirmButton';
 
 export default function AdminStudentsDirectoryPage() {
   const router = useRouter();
@@ -147,6 +148,7 @@ export default function AdminStudentsDirectoryPage() {
             >
               Dashboard
             </Link>
+            <LogoutConfirmButton role="ADMIN" />
           </div>
         </div>
       </header>

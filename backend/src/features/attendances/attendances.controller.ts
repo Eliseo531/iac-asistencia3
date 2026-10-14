@@ -17,10 +17,12 @@ import { Request } from 'express';
 import { AttendancesService } from './attendances.service';
 import { StudentJwtGuard } from '../../common/guards/student-jwt.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { TodayStatusResponseDto } from './dto/today-status.dto';
 
 @ApiTags('Attendances')
 @ApiBearerAuth('jwt-auth')
+@Public()
 @UseGuards(StudentJwtGuard)
 @Controller('attendances')
 export class AttendancesController {

@@ -186,4 +186,33 @@ describe('AuthService', () => {
       );
     });
   });
+
+  describe('logout', () => {
+    it('debe registrar el evento inmutable de cierre de sesión en auditoría', async () => {
+      const mockUser = {
+        userId: 'uuid-1',
+        username: 'admin',
+        role: UserRole.ADMIN,
+      };
+
+      const result = await service.logout(mockUser, '192.168.1.100');
+
+      expect(activityLogRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'uuid-1',
+          userIdentifier: 'admin',
+          userRole: UserRole.ADMIN,
+          ipAddress: '192.168.1.100',
+        }),
+      );
+      expect(activityLogRepo.save).toHaveBeenCalled();
+      expect(result).toEqual({ message: 'Sesión cerrada exitosamente' });
+    });
+
+    it('debe retornar mensaje de éxito incluso si no se provee usuario autenticado', async () => {
+      const result = await service.logout(undefined);
+      expect(result).toEqual({ message: 'Sesión cerrada exitosamente' });
+    });
+  });
 });
+

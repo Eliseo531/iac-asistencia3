@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/features/auth/services/auth.service';
 import { AuthUser } from '@/features/auth/types/auth.types';
+import { LogoutConfirmButton } from '@/features/auth/components/LogoutConfirmButton';
 import { ModuleImportService } from '@/features/modules/services/module-import.service';
 
 export default function AdminDashboardPage() {
@@ -78,12 +79,7 @@ export default function AdminDashboardPage() {
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300">
               {user?.role || 'ADMIN'}
             </span>
-            <button
-              onClick={handleLogout}
-              className="px-3.5 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-900 transition"
-            >
-              Cerrar Sesión
-            </button>
+            <LogoutConfirmButton role="ADMIN" />
           </div>
         </div>
       </header>
@@ -258,13 +254,13 @@ export default function AdminDashboardPage() {
               <span>🚀 Historias de Usuario Implementadas (Prog. 1)</span>
             </h2>
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-              24 Story Points Completados
+              26 Story Points Completados
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
             {/* US-01 Card */}
-            <div className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
+            <div className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-3.5 shadow-sm relative overflow-hidden flex flex-col justify-between">
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -288,7 +284,7 @@ export default function AdminDashboardPage() {
             {/* US-04 Card */}
             <Link
               href="/admin/modulo/importar"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-3.5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
             >
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
@@ -314,7 +310,7 @@ export default function AdminDashboardPage() {
             {/* US-05 Card */}
             <Link
               href="/admin/modulo/importar/fechas"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-3.5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
             >
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
@@ -340,7 +336,7 @@ export default function AdminDashboardPage() {
             {/* US-06 Card */}
             <Link
               href="/admin/modulo/preview"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-300 dark:border-emerald-800 p-3.5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
             >
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
@@ -366,7 +362,7 @@ export default function AdminDashboardPage() {
             {/* US-07 Card */}
             <Link
               href="/admin/modulo/preview"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-400 dark:border-emerald-700 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-400 dark:border-emerald-700 p-3.5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
             >
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
@@ -392,7 +388,7 @@ export default function AdminDashboardPage() {
             {/* US-10 Card */}
             <Link
               href="/admin/estudiantes"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-400 dark:border-emerald-700 p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
+              className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-400 dark:border-emerald-700 p-3.5 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between group"
             >
               <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
               <div>
@@ -414,6 +410,29 @@ export default function AdminDashboardPage() {
                 <span>→</span>
               </div>
             </Link>
+
+            {/* US-03 Card */}
+            <div className="rounded-xl bg-white dark:bg-zinc-900 border border-emerald-400 dark:border-emerald-700 p-3.5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 right-0 w-1.5 h-full bg-emerald-500" />
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    US-03 • FASE 2
+                  </span>
+                  <span className="text-xs text-zinc-400 font-mono">2 SP</span>
+                </div>
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mb-1">
+                  Guards & Logout
+                </h3>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-snug">
+                  Cierre seguro y RBAC.
+                </p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-between">
+                <span>✓ Blindaje</span>
+                <span>✓</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -426,7 +445,7 @@ export default function AdminDashboardPage() {
             <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60">
               <span className="block text-xs text-zinc-500 mb-0.5">Rama Git Activa</span>
               <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-xs">
-                feature/US-10-students-search-directory
+                feature/US-03-global-auth-guards-logout
               </span>
             </div>
             <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60">
