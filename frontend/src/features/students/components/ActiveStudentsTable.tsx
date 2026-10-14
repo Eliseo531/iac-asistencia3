@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { StudentItem } from '../types/student.types';
-import { Users, Mail, Calendar, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Users, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ActiveStudentsTableProps {
   students: StudentItem[];

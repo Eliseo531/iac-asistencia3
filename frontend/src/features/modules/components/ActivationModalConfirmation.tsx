@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ModuleMetadata } from '../types/module-preview.types';
-import { AlertTriangle, CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, Loader2, ShieldAlert } from 'lucide-react';
 
 interface ActivationModalConfirmationProps {
   isOpen: boolean;

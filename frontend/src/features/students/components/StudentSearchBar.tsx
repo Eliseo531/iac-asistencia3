@@ -19,10 +19,12 @@ export const StudentSearchBar: React.FC<StudentSearchBarProps> = ({
   isLoading = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     setSearchTerm(value);
-  }, [value]);
+  }
 
   useEffect(() => {
     const handler = setTimeout(() => {

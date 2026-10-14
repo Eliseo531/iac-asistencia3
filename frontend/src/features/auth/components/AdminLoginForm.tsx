@@ -52,11 +52,12 @@ export default function AdminLoginForm() {
       setTimeout(() => {
         router.push('/admin/dashboard');
       }, 600);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err && typeof err === 'object') {
-        if (err.message) {
-          setErrorMessage(err.message);
-        } else if (err.code === 'INVALID_CREDENTIALS') {
+        const errorObj = err as Record<string, unknown>;
+        if (typeof errorObj.message === 'string') {
+          setErrorMessage(errorObj.message);
+        } else if (errorObj.code === 'INVALID_CREDENTIALS') {
           setErrorMessage('Credenciales de acceso incorrectas');
         } else {
           setErrorMessage('Error al conectar con el servidor. Intente nuevamente.');
