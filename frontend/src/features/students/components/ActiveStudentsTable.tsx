@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { StudentItem } from '../types/student.types';
+import { Users, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ActiveStudentsTableProps {
   students: StudentItem[];
@@ -44,80 +45,68 @@ export const ActiveStudentsTable: React.FC<ActiveStudentsTableProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Contenedor de la tabla responsiva */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
+      {/* Contenedor de la tabla responsiva con Top Accent */}
+      <div className="bg-white border-t-4 border-t-indigo-600 rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 font-semibold text-xs uppercase tracking-wider">
+              <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">
                 <th className="py-3.5 px-4 w-12 text-center">#</th>
-                <th className="py-3.5 px-4">Matrícula / Registro</th>
+                <th className="py-3.5 px-4">Matrícula Institucional</th>
                 <th className="py-3.5 px-4">Nombre Completo</th>
                 <th className="py-3.5 px-4">Correo Electrónico</th>
                 <th className="py-3.5 px-4 text-right">Fecha de Alta</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-zinc-900 dark:text-zinc-100">
+            <tbody className="divide-y divide-slate-100 text-slate-900">
               {isLoading ? (
                 // Skeletons de carga
                 Array.from({ length: 5 }).map((_, idx) => (
                   <tr key={`skel-${idx}`} className="animate-pulse">
                     <td className="py-4 px-4 text-center">
-                      <div className="h-4 w-6 bg-zinc-200 dark:bg-zinc-800 rounded mx-auto" />
+                      <div className="h-4 w-6 bg-slate-200 rounded mx-auto" />
                     </td>
                     <td className="py-4 px-4">
-                      <div className="h-5 w-20 bg-zinc-200 dark:bg-zinc-800 rounded" />
+                      <div className="h-5 w-24 bg-slate-200 rounded" />
                     </td>
                     <td className="py-4 px-4">
-                      <div className="h-4 w-40 bg-zinc-200 dark:bg-zinc-800 rounded" />
+                      <div className="h-4 w-44 bg-slate-200 rounded" />
                     </td>
                     <td className="py-4 px-4">
-                      <div className="h-4 w-48 bg-zinc-200 dark:bg-zinc-800 rounded" />
+                      <div className="h-4 w-48 bg-slate-200 rounded" />
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <div className="h-4 w-24 bg-zinc-200 dark:bg-zinc-800 rounded ml-auto" />
+                      <div className="h-4 w-24 bg-slate-200 rounded ml-auto" />
                     </td>
                   </tr>
                 ))
               ) : students.length === 0 ? (
                 // Estado vacío
                 <tr>
-                  <td colSpan={5} className="py-12 px-4 text-center">
+                  <td colSpan={5} className="py-14 px-4 text-center">
                     <div className="flex flex-col items-center justify-center max-w-sm mx-auto text-center space-y-3">
-                      <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
-                        <svg
-                          className="w-6 h-6"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                          />
-                        </svg>
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
+                        <Users className="w-6 h-6" />
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        <h4 className="text-sm font-bold text-slate-900">
                           {searchTerm
-                            ? `No se encontraron estudiantes que coincidan con "${searchTerm}"`
+                            ? `No se encontraron resultados para "${searchTerm}"`
                             : 'No hay estudiantes matriculados'}
                         </h4>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        <p className="text-xs text-slate-500">
                           {searchTerm
-                            ? 'Prueba con otro número de registro, nombre o dirección de correo.'
-                            : 'El módulo académico activo aún no tiene estudiantes cargados en el sistema.'}
+                            ? 'Verifique el número de matrícula, nombre o correo ingresado.'
+                            : 'El módulo académico activo aún no cuenta con estudiantes registrados.'}
                         </p>
                       </div>
                       {searchTerm && onClearSearch && (
                         <button
                           type="button"
                           onClick={onClearSearch}
-                          className="px-3.5 py-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition"
+                          className="px-3.5 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition border border-indigo-200 cursor-pointer"
                         >
-                          Limpiar búsqueda
+                          Limpiar filtro de búsqueda
                         </button>
                       )}
                     </div>
@@ -130,22 +119,22 @@ export const ActiveStudentsTable: React.FC<ActiveStudentsTableProps> = ({
                   return (
                     <tr
                       key={student.id}
-                      className="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/40 transition-colors"
+                      className="hover:bg-slate-50/80 transition-colors"
                     >
-                      <td className="py-3.5 px-4 text-center font-mono text-xs text-zinc-400 dark:text-zinc-500">
+                      <td className="py-3.5 px-4 text-center font-mono text-xs text-slate-400">
                         {itemNumber}
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-mono text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/40">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-mono text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
                           {student.registrationNumber}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                          <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                             {student.fullName.charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                          <span className="font-semibold text-slate-900">
                             {student.fullName}
                           </span>
                         </div>
@@ -153,12 +142,13 @@ export const ActiveStudentsTable: React.FC<ActiveStudentsTableProps> = ({
                       <td className="py-3.5 px-4">
                         <a
                           href={`mailto:${student.email}`}
-                          className="text-xs text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 underline-offset-2 hover:underline transition"
+                          className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-indigo-700 font-medium transition"
                         >
-                          {student.email}
+                          <Mail className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{student.email}</span>
                         </a>
                       </td>
-                      <td className="py-3.5 px-4 text-right text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+                      <td className="py-3.5 px-4 text-right text-xs text-slate-500 font-mono tabular-nums">
                         {formatDate(student.createdAt)}
                       </td>
                     </tr>
@@ -171,18 +161,18 @@ export const ActiveStudentsTable: React.FC<ActiveStudentsTableProps> = ({
 
         {/* Barra inferior de paginación */}
         {totalCount > 0 && (
-          <div className="px-4 py-3 bg-zinc-50/70 dark:bg-zinc-900/60 border-t border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-600 dark:text-zinc-400">
+          <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 font-medium">
             <div>
               Mostrando{' '}
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+              <span className="font-bold font-mono tabular-nums text-slate-900">
                 {startItem}
               </span>{' '}
               a{' '}
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+              <span className="font-bold font-mono tabular-nums text-slate-900">
                 {endItem}
               </span>{' '}
               de{' '}
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+              <span className="font-bold font-mono tabular-nums text-slate-900">
                 {totalCount}
               </span>{' '}
               estudiantes
@@ -193,12 +183,13 @@ export const ActiveStudentsTable: React.FC<ActiveStudentsTableProps> = ({
                 type="button"
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage <= 1 || isLoading}
-                className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs transition cursor-pointer"
               >
-                ← Anterior
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Anterior</span>
               </button>
 
-              <span className="px-2 font-mono font-medium">
+              <span className="px-2 font-mono font-bold text-slate-800">
                 Pág. {currentPage} de {totalPages || 1}
               </span>
 
@@ -206,9 +197,10 @@ export const ActiveStudentsTable: React.FC<ActiveStudentsTableProps> = ({
                 type="button"
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage >= totalPages || isLoading}
-                className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs transition cursor-pointer"
               >
-                Siguiente →
+                <span>Siguiente</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

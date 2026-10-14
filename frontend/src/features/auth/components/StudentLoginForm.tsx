@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useStudentAuth } from '../hooks/useStudentAuth';
-import { GraduationCap, AlertCircle, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { GraduationCap, AlertCircle, ArrowRight, Loader2, CheckCircle2, Info } from 'lucide-react';
 
 export function StudentLoginForm() {
   const [identifier, setIdentifier] = useState('');
@@ -15,7 +15,7 @@ export function StudentLoginForm() {
 
     const trimmed = identifier.trim();
     if (!trimmed) {
-      setLocalError('Por favor ingrese su correo electrónico o su número de registro.');
+      setLocalError('Por favor ingrese su correo electrónico o su número de matrícula.');
       return;
     }
 
@@ -29,25 +29,28 @@ export function StudentLoginForm() {
   const displayedError = localError || error;
 
   return (
-    <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-zinc-800 p-8 sm:p-10 transition-colors">
+    <div className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-300/40 border border-slate-200/90 border-t-4 border-t-emerald-500 p-8 sm:p-10 transition-all">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 mb-4 border border-indigo-100 dark:border-indigo-800/60 shadow-sm">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 border border-emerald-200 mb-4 shadow-xs">
           <GraduationCap className="w-8 h-8" />
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 mb-2">
+          <span>Acceso Directo</span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
           Portal del Estudiante
         </h1>
-        <p className="text-sm text-slate-500 dark:text-zinc-400 mt-2">
-          Ingrese su identificación para registrar o consultar su asistencia académica
+        <p className="text-sm text-slate-600 mt-2">
+          Ingrese su identificación para marcar su asistencia en tiempo real o consultar su historial académico.
         </p>
       </div>
 
       {displayedError && (
         <div
           role="alert"
-          className="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-sm flex items-start space-x-3"
+          className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-start space-x-3 shadow-2xs"
         >
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-500 dark:text-rose-400" />
+          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-600" />
           <span className="font-medium">{displayedError}</span>
         </div>
       )}
@@ -56,37 +59,38 @@ export function StudentLoginForm() {
         <div>
           <label
             htmlFor="identifier"
-            className="block text-sm font-semibold text-slate-700 dark:text-zinc-300 mb-2"
+            className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2"
           >
-            Correo Electrónico o N° de Registro
+            Matrícula o Correo Institucional
           </label>
           <input
             id="identifier"
             type="text"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="Ej. 1001 o juan@gmail.com"
+            placeholder="Ej. 1001 o estudiante@universidad.edu"
             disabled={isLoading}
-            className={`w-full px-4 py-3.5 rounded-xl border text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 bg-slate-50/50 dark:bg-zinc-800/60 focus:bg-white dark:focus:bg-zinc-800 focus:outline-none focus:ring-2 transition ${
+            className={`w-full px-4 py-3.5 rounded-xl border text-slate-900 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 transition text-sm font-medium ${
               displayedError
-                ? 'border-rose-300 dark:border-rose-800 focus:ring-rose-200 dark:focus:ring-rose-900'
-                : 'border-slate-200 dark:border-zinc-700 focus:ring-indigo-100 dark:focus:ring-indigo-900/60 focus:border-indigo-500 dark:focus:border-indigo-500'
-            } disabled:bg-slate-100 dark:disabled:bg-zinc-800 disabled:cursor-not-allowed`}
+                ? 'border-rose-400 focus:ring-rose-200'
+                : 'border-slate-300 focus:ring-emerald-500/20 focus:border-emerald-600'
+            } disabled:bg-slate-100 disabled:cursor-not-allowed`}
           />
-          <p className="text-xs text-slate-400 dark:text-zinc-500 mt-2">
-            No requiere contraseña. Solo debe estar matriculado en el módulo activo.
-          </p>
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-2">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>Acceso sin contraseña mediante padrón del módulo activo.</span>
+          </div>
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {isLoading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Verificando matrícula...</span>
+              <span>Verificando matrícula en módulo activo...</span>
             </>
           ) : (
             <>
@@ -97,10 +101,12 @@ export function StudentLoginForm() {
         </button>
       </form>
 
-      <div className="mt-8 pt-6 border-t border-slate-100 dark:border-zinc-800 text-center">
-        <div className="inline-flex items-center gap-1.5 text-xs text-slate-400 dark:text-zinc-500">
-          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-          <span>Datos sembrados: <strong className="text-slate-600 dark:text-zinc-300">1001</strong> o <strong className="text-slate-600 dark:text-zinc-300">juan@gmail.com</strong></span>
+      <div className="mt-8 pt-5 border-t border-slate-100">
+        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 flex items-start gap-2.5">
+          <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            Si tiene problemas para acceder, asegúrese de ingresar el número de matrícula o correo con el que fue registrado por la administración.
+          </p>
         </div>
       </div>
     </div>

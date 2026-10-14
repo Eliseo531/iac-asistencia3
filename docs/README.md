@@ -12,6 +12,8 @@ Bienvenido a la carpeta de documentación del **Sistema Web de Registro y Contro
 | **Historias de Usuario** | Catálogo completo de Historias de Usuario (**US-01 a US-15**), organizadas por épicas con criterios de aceptación BDD (Gherkin), especificaciones de frontend/backend/DB, y Story Points. | [Ver Historias de Usuario](historias-de-usuario.md) |
 | **Dependencias y Paralelización** | Matriz y grafo visual de dependencias, identificación del camino crítico, distribución en 4 Tracks autónomos, estrategia de desacoplamiento y matriz RACI. | [Ver Plan de Paralelización](dependencias-y-paralelizacion.md) |
 | **Repartición para 2 Devs** | Estrategia de arranque en paralelo sin bloqueos para un equipo de 2 programadores, Paso Cero con semillas y matriz sin colisiones Git. | [Ver Repartición para 2 Programadores](reparticion-2-programadores.md) |
+| **Vistas del Frontend** | Catálogo técnico de vistas, páginas, componentes, flujos de navegación, middleware y reglas de acceso del frontend. | [Ver Catálogo de Vistas](vistas-frontend.md) |
+| **Dirección Visual General** | Sistema de diseño, filosofía visual, paleta cromática, escala tipográfica, arquetipos de interfaz y pautas de micro-interacciones académicas. | [Ver Dirección Visual](direccion-visual-general.md) |
 | **Despliegue Render & Vercel** | Guía paso a paso para desplegar Backend y PostgreSQL en Render y Frontend en Vercel con Blueprint y variables de entorno. | [Ver Guía de Despliegue](despliegue-render-vercel.md) |
 
 ---
