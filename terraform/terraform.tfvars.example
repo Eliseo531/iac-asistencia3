@@ -1,0 +1,13 @@
+# Archivo de ejemplo para personalizar variables de tu entorno en AWS Free Tier.
+# Para utilizarlo, copia este archivo como terraform.tfvars:
+# cp terraform.tfvars.example terraform.tfvars
+
+aws_region    = "us-east-1"
+instance_type = "t2.micro"
+project_name  = "iac-asistencia"
+
+# Si creaste una clave SSH (.pem) en la consola de AWS (EC2 -> Key Pairs), pon su nombre aqui:
+# key_name    = "mi-clave-aws"
+
+# Si deseas que tu IP publica personal pueda acceder directamente por SSH al backend (opcional):
+# admin_ssh_ip = "190.10.20.30/32"
