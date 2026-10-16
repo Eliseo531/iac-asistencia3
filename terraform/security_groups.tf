@@ -67,15 +67,6 @@ resource "aws_security_group" "backend_sg" {
     security_groups = [aws_security_group.frontend_sg.id]
   }
 
-  # Puerto 5432 (PostgreSQL): Permitido solo desde el frontend o internamente
-  ingress {
-    description     = "Acceso a PostgreSQL desde Frontend"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.frontend_sg.id]
-  }
-
   # Puerto 22 (SSH): Permitido como Bastion desde el Frontend
   ingress {
     description     = "Acceso SSH de salto (Bastion) desde el Frontend"
@@ -83,6 +74,18 @@ resource "aws_security_group" "backend_sg" {
     to_port         = 22
     protocol        = "tcp"
     security_groups = [aws_security_group.frontend_sg.id]
+  }
+
+  # Regla opcional: Permitir SSH directo al backend solo si se especifico la IP del administrador
+  dynamic "ingress" {
+    for_each = var.admin_ssh_ip != null ? [var.admin_ssh_ip] : []
+    content {
+      description = "Acceso SSH de emergencia desde la IP fija del administrador"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
   }
 
   # Salida hacia internet para que el backend pueda descargar paquetes (apt, docker, npm)
@@ -99,16 +102,4 @@ resource "aws_security_group" "backend_sg" {
     Tier    = "Backend-Restricted"
     Project = var.project_name
   }
-}
-
-# Regla opcional: Permitir SSH directo al backend solo si se especifico la IP del administrador
-resource "aws_security_group_rule" "admin_ssh_backend" {
-  count             = var.admin_ssh_ip != null ? 1 : 0
-  type              = "ingress"
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
-  cidr_blocks       = [var.admin_ssh_ip]
-  security_group_id = aws_security_group.backend_sg.id
-  description       = "Acceso SSH de emergencia desde la IP fija del administrador"
 }

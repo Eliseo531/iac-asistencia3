@@ -78,16 +78,6 @@ resource "aws_network_acl" "backend_nacl" {
     protocol   = "tcp"
   }
 
-  # Ingress: Permitir PostgreSQL (Puerto 5432) UNICAMENTE desde la subred del Frontend
-  ingress {
-    rule_no    = 110
-    action     = "allow"
-    cidr_block = var.public_subnet_cidr
-    from_port  = 5432
-    to_port    = 5432
-    protocol   = "tcp"
-  }
-
   # Ingress: Permitir SSH (Puerto 22) de salto desde la subred del Frontend
   ingress {
     rule_no    = 120
@@ -96,6 +86,19 @@ resource "aws_network_acl" "backend_nacl" {
     from_port  = 22
     to_port    = 22
     protocol   = "tcp"
+  }
+
+  # Ingress opcional: Permitir SSH (Puerto 22) directo desde la IP del administrador si fue configurada
+  dynamic "ingress" {
+    for_each = var.admin_ssh_ip != null ? [var.admin_ssh_ip] : []
+    content {
+      rule_no    = 125
+      action     = "allow"
+      cidr_block = ingress.value
+      from_port  = 22
+      to_port    = 22
+      protocol   = "tcp"
+    }
   }
 
   # Ingress: Puertos efimeros para recibir respuestas cuando el backend descarga paquetes (apt, docker)

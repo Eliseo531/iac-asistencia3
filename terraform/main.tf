@@ -46,9 +46,23 @@ resource "aws_instance" "frontend_server" {
     delete_on_termination = true
   }
 
-  # Script base para actualizar paquetes y preinstalar utilidades basicas
+  # Script base para configurar memoria Swap (2 GB) y preinstalar utilidades basicas
   user_data = <<-EOF
               #!/bin/bash
+              set -e
+
+              # 1. Configurar archivo Swap de 2 GB (previene OOM en instancias t2.micro con 1 GB RAM)
+              if [ ! -f /swapfile ]; then
+                fallocate -l 2G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=2048
+                chmod 600 /swapfile
+                mkswap /swapfile
+                swapon /swapfile
+                echo '/swapfile none swap sw 0 0' >> /etc/fstab
+                sysctl vm.swappiness=10
+                echo 'vm.swappiness=10' >> /etc/sysctl.conf
+              fi
+
+              # 2. Actualizar repositorios e instalar paquetes base
               apt-get update -y
               apt-get install -y ca-certificates curl gnupg git ufw
               EOF
@@ -77,9 +91,23 @@ resource "aws_instance" "backend_server" {
     delete_on_termination = true
   }
 
-  # Script base para actualizar paquetes y preinstalar utilidades basicas
+  # Script base para configurar memoria Swap (2 GB) y preinstalar utilidades basicas
   user_data = <<-EOF
               #!/bin/bash
+              set -e
+
+              # 1. Configurar archivo Swap de 2 GB (previene OOM en instancias t2.micro con 1 GB RAM)
+              if [ ! -f /swapfile ]; then
+                fallocate -l 2G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=2048
+                chmod 600 /swapfile
+                mkswap /swapfile
+                swapon /swapfile
+                echo '/swapfile none swap sw 0 0' >> /etc/fstab
+                sysctl vm.swappiness=10
+                echo 'vm.swappiness=10' >> /etc/sysctl.conf
+              fi
+
+              # 2. Actualizar repositorios e instalar paquetes base
               apt-get update -y
               apt-get install -y ca-certificates curl gnupg git ufw
               EOF
