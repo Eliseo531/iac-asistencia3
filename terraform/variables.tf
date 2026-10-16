@@ -1,7 +1,7 @@
 variable "aws_region" {
   description = "Región de AWS donde se desplegarán los recursos"
   type        = string
-  default     = "us-east-1"
+  default     = "us-east-2"
 }
 
 variable "project_name" {
@@ -11,9 +11,9 @@ variable "project_name" {
 }
 
 variable "instance_type" {
-  description = "Tipo de instancia EC2 (t2.micro incluida en la capa gratuita - Free Tier)"
+  description = "Tipo de instancia EC2 (t3.micro incluida en la capa gratuita - Free Tier)"
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "key_name" {
@@ -23,9 +23,9 @@ variable "key_name" {
 }
 
 variable "ami_id" {
-  description = "ID de la AMI oficial de Ubuntu 22.04 LTS en us-east-1 (apta para Free Tier). Evita la llamada DescribeImages bloqueada por SCP institucional"
+  description = "ID de la AMI oficial de Ubuntu 22.04 LTS en us-east-2 (apta para Free Tier)"
   type        = string
-  default     = "ami-062944a84867f2386"
+  default     = "ami-0d966c673c03a734a"
 }
 
 variable "vpc_cidr" {
