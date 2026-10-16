@@ -34,18 +34,34 @@ flowchart LR
 
 ## 🔑 2. Conexión SSH a los Servidores
 
-Para ejecutar estos pasos necesitas tu archivo de clave privada (`tu-clave.pem`) obtenido de la consola de AWS EC2.
+Para ejecutar estos pasos necesitas tu archivo de clave privada (`iac-asistencia.pem`) obtenido de la consola de AWS EC2 (región `us-east-2`).
+
+> [!IMPORTANT]
+> **Permisos de la Clave en Windows (Obligatorio):**  
+> Si usas Windows, OpenSSH rechazará la clave por tener permisos heredados demasiado abiertos (*"UNPROTECTED PRIVATE KEY FILE"*). Antes de conectar, ejecuta en PowerShell para dar lectura exclusiva a tu usuario:
+> ```powershell
+> icacls.exe ".\iac-asistencia.pem" /reset
+> icacls.exe ".\iac-asistencia.pem" /grant:r "$($env:USERNAME):(R)"
+> icacls.exe ".\iac-asistencia.pem" /inheritance:r
+> ```
+> *(En Linux o macOS simplemente ejecutas: `chmod 400 iac-asistencia.pem`)*
 
 ### A. Conectar al Servidor Frontend (Público):
-```bash
-ssh -i /ruta/a/tu-clave.pem ubuntu@<IP_PUBLICA_FRONTEND>
-```
+* **Desde PowerShell / Bash:**
+  ```powershell
+  ssh -i .\iac-asistencia.pem ubuntu@<IP_PUBLICA_FRONTEND>
+  ```
 
-### B. Conectar al Servidor Backend (Aislado vía Bastion/Salto):
+### B. Conectar al Servidor Backend (Aislado vía Salto / Bastion):
 Como el backend no permite SSH directo desde internet, usamos el Frontend como salto (*Jump Host*):
-```bash
-ssh -i /ruta/a/tu-clave.pem -J ubuntu@<IP_PUBLICA_FRONTEND> ubuntu@<IP_PRIVADA_BACKEND>
-```
+* **Opción recomendada en PowerShell (Windows):**
+  ```powershell
+  ssh -i .\iac-asistencia.pem -o "ProxyCommand=ssh -i .\iac-asistencia.pem -W %h:%p ubuntu@<IP_PUBLICA_FRONTEND>" ubuntu@<IP_PRIVADA_BACKEND>
+  ```
+* **Opción estándar en Linux / macOS / Git Bash (`-J`):**
+  ```bash
+  ssh -i ./iac-asistencia.pem -J ubuntu@<IP_PUBLICA_FRONTEND> ubuntu@<IP_PRIVADA_BACKEND>
+  ```
 
 ---
 
@@ -92,7 +108,7 @@ newgrp docker
 ### Paso 3.4: Clonar el Repositorio
 ```bash
 cd ~
-git clone https://github.com/FernandoCossio/iac-asistencia.git
+git clone -b fernando https://github.com/FernandoCossio/iac-asistencia.git
 cd iac-asistencia
 ```
 
@@ -101,8 +117,14 @@ Inicia el contenedor de PostgreSQL usando el `docker-compose.yml` del proyecto:
 ```bash
 docker compose up -d postgres
 
-# Verificar que el contenedor esté corriendo (Up):
-docker ps
+# Esperar unos segundos a que PostgreSQL termine su inicialización interna:
+for i in {1..30}; do
+  if docker exec asistencia-postgres pg_isready -U postgres >/dev/null 2>&1; then
+    echo "✅ PostgreSQL está listo para recibir conexiones!"
+    break
+  fi
+  sleep 2
+done
 ```
 
 ### Paso 3.6: Configurar Variables de Entorno del Backend
@@ -180,7 +202,7 @@ sudo apt install -y nodejs
 ### Paso 4.2: Clonar el Repositorio
 ```bash
 cd ~
-git clone https://github.com/FernandoCossio/iac-asistencia.git
+git clone -b fernando https://github.com/FernandoCossio/iac-asistencia.git
 cd iac-asistencia/frontend
 ```
 
@@ -227,14 +249,10 @@ Ahora configuraremos Nginx en el Servidor Frontend para que reciba las peticione
 * `/api/` $\rightarrow$ A la IP privada del Backend en el puerto `3000`.
 
 ### Paso 5.1: Crear el Bloque de Servidor en Nginx
-Crea un nuevo archivo de configuración:
+Puedes crearlo con `sudo nano /etc/nginx/sites-available/asistencia` o pegar directamente este comando automatizado con `sudo tee` (sustituyendo `<IP_PRIVADA_BACKEND>` por tu IP privada, ej. `10.0.2.216`):
+
 ```bash
-sudo nano /etc/nginx/sites-available/asistencia
-```
-
-Pega la siguiente configuración (sustituyendo `<IP_PRIVADA_BACKEND>` por la IP interna obtenida en `terraform output backend_private_ip`, ej. `10.0.2.x`):
-
-```nginx
+cat << 'EOFNGINX' | sudo tee /etc/nginx/sites-available/asistencia > /dev/null
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
@@ -272,6 +290,7 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 }
+EOFNGINX
 ```
 
 ### Paso 5.2: Habilitar el Sitio y Reiniciar Nginx
@@ -300,7 +319,7 @@ http://<IP_PUBLICA_FRONTEND>
 ```
 * Debe cargar la pantalla de Login del Sistema de Asistencia.
 * Ingresa con las credenciales de semilla (Admin):
-  * **Email:** `admin@uagrm.edu.bo`
+  * **Email:** `admin@sistema.com` (o `admin@uagrm.edu.bo`)
   * **Password:** `admin123`
 * Al iniciar sesión, la interfaz debe comunicarse de forma transparente con la API privada a través de Nginx y mostrar los módulos y datos de asistencia.
 
