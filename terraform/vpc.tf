@@ -35,9 +35,6 @@ resource "aws_subnet" "frontend_subnet" {
 }
 
 # Subred Aislada: Alojamiento del Servidor Backend (NestJS + PostgreSQL)
-# Se asocia a la tabla de ruteo para permitir salida a internet (egress para apt/docker)
-# sin incurrir en el costo de un NAT Gateway (~$32/mes).
-# La seguridad de entrada (ingress) está 100% garantizada por el Security Group y la NACL.
 resource "aws_subnet" "backend_subnet" {
   vpc_id                  = aws_vpc.main_vpc.id
   cidr_block              = var.private_subnet_cidr
