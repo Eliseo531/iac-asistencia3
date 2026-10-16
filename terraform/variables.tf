@@ -22,6 +22,12 @@ variable "key_name" {
   default     = null
 }
 
+variable "ami_id" {
+  description = "ID de la AMI oficial de Ubuntu 22.04 LTS en us-east-1 (apta para Free Tier). Evita la llamada DescribeImages bloqueada por SCP institucional"
+  type        = string
+  default     = "ami-062944a84867f2386"
+}
+
 variable "vpc_cidr" {
   description = "Bloque CIDR de la VPC"
   type        = string

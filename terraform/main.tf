@@ -13,27 +13,11 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Obtener automáticamente la última AMI oficial de Ubuntu 22.04 LTS (Apta para Free Tier)
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  owners      = ["099720109477"] # Canonical ID
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
 # ==========================================================
 # 1. Servidor Frontend (Next.js + Nginx) - Subred Publica
 # ==========================================================
 resource "aws_instance" "frontend_server" {
-  ami                    = data.aws_ami.ubuntu.id
+  ami                    = var.ami_id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.frontend_subnet.id
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]
@@ -78,7 +62,7 @@ resource "aws_instance" "frontend_server" {
 # 2. Servidor Backend (NestJS + PostgreSQL) - Subred Aislada
 # ==========================================================
 resource "aws_instance" "backend_server" {
-  ami                    = data.aws_ami.ubuntu.id
+  ami                    = var.ami_id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.backend_subnet.id
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
