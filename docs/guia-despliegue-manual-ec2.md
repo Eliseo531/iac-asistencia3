@@ -119,7 +119,7 @@ docker compose up -d postgres
 
 # Esperar unos segundos a que PostgreSQL termine su inicialización interna:
 for i in {1..30}; do
-  if docker exec asistencia-postgres pg_isready -U postgres >/dev/null 2>&1; then
+  if docker exec iac-asistencia-db pg_isready -U postgres >/dev/null 2>&1; then
     echo "✅ PostgreSQL está listo para recibir conexiones!"
     break
   fi
