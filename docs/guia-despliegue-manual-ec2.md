@@ -333,11 +333,22 @@ curl --max-time 5 http://<IP_PUBLICA_BACKEND>:3000/api/v1
 
 ---
 
-## 🧹 7. Destrucción de Recursos para Evitar Cobros (Free Tier)
+## 🧹 7. Apagado Temporal o Destrucción de Recursos (Control de Costos)
 
-Al finalizar la demostración o jornada de pruebas, destruye los recursos en tu máquina local para no exceder las 750 horas de la capa gratuita:
+Para no consumir horas innecesarias de la Capa Gratuita (750 horas mensuales de EC2):
+
+### Opción A: Detener las Instancias (Recomendado para pausar y continuar después)
+Si deseas pausar tu trabajo y retomarlo al día siguiente sin perder la base de datos ni las instalaciones:
+1. En la consola de AWS EC2, selecciona ambas instancias (`iac-asistencia-frontend` y `iac-asistencia-backend`).
+2. Ve a **Estado de la instancia** (*Instance state*) $\rightarrow$ **Detener instancia** (*Stop instance*).
+3. Cuando vuelvas a encenderlas (*Start*), consulta la guía detallada:  
+   👉 **[Guía de Re-levantamiento de Servidores EC2](guia-re-levantamiento-ec2.md)** para reconectar y verificar los servicios en pocos minutos.
+
+### Opción B: Destrucción Total con Terraform (Al finalizar el módulo o entrega)
+Si ya concluiste las evaluaciones y deseas eliminar permanentemente todos los recursos de AWS:
 
 ```powershell
 cd terraform
 terraform destroy -auto-approve
 ```
+
