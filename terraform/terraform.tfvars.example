@@ -11,3 +11,6 @@ project_name  = "iac-asistencia"
 
 # Si deseas que tu IP publica personal pueda acceder directamente por SSH al backend (opcional):
 # admin_ssh_ip = "190.10.20.30/32"
+
+#ubuntu 24.04 LTS
+ami_id = "ami-053b0a84c1d8f0003"
