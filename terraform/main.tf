@@ -8,9 +8,9 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "iac-asistencia-tfstate-006635110928-us-east-2"
+    bucket         = "iac-asistencia-tfstate-900670597917-us-east-1"
     key            = "asistencia/terraform.tfstate"
-    region         = "us-east-2"
+    region         = "us-east-1"
     dynamodb_table = "iac-asistencia-tf-locks"
     encrypt        = true
   }
