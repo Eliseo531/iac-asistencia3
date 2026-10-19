@@ -17,6 +17,7 @@ Bienvenido a la carpeta de documentación del **Sistema Web de Registro y Contro
 | **Despliegue Render & Vercel** | Guía paso a paso para desplegar Backend y PostgreSQL en Render y Frontend en Vercel con Blueprint y variables de entorno. | [Ver Guía de Despliegue Render](despliegue-render-vercel.md) |
 | **Despliegue AWS EC2 (2-Tier)** | Guía de despliegue manual en 2 servidores AWS EC2 (Frontend + Backend Aislado) con Nginx Reverse Proxy, PM2 y Docker. | [Ver Guía Despliegue EC2](guia-despliegue-manual-ec2.md) |
 | **Re-levantamiento EC2** | Guía rápida para reactivar y diagnosticar servicios tras detener y encender instancias EC2 para ahorro de costos. | [Ver Guía de Re-levantamiento](guia-re-levantamiento-ec2.md) |
+| **Remote Backend S3** | Configuración de estado remoto en S3 con DynamoDB Lock (Patrón Bootstrap y migración). | [Ver Guía Remote Backend S3](guia-remote-backend-s3.md) |
 
 ---
 

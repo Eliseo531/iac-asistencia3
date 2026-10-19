@@ -6,6 +6,14 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    bucket         = "iac-asistencia-tfstate-006635110928-us-east-2"
+    key            = "asistencia/terraform.tfstate"
+    region         = "us-east-2"
+    dynamodb_table = "iac-asistencia-tf-locks"
+    encrypt        = true
+  }
 }
 
 # Proveedor de AWS (las credenciales se leen de las variables de entorno de la sesión)
