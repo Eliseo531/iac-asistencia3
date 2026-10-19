@@ -25,7 +25,24 @@ Aplicación web modular para el registro, consulta y administración de asistenc
 
 ## 🚀 Guía de Inicio Rápido (Setup Local)
 
-### 1. Configurar y Levantar el Backend (NestJS)
+### Opción Rápida: Levantar Todo con un Solo Comando (Raíz)
+
+Desde la raíz del proyecto:
+```bash
+# Iniciar Backend y Frontend en paralelo:
+npm run dev
+# O en Windows hacer doble clic en: start.bat
+```
+
+* **Frontend Web:** [http://localhost:3001](http://localhost:3001)
+* **Backend API:** [http://localhost:3000/api/v1](http://localhost:3000/api/v1)
+* **Swagger Docs:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+
+---
+
+### Opción Manual: Terminales Separadas
+
+#### 1. Configurar y Levantar el Backend (NestJS)
 
 ```bash
 # 1. Ingresar al directorio del backend
@@ -101,6 +118,7 @@ Si estás trabajando en este proyecto con tu compañero de equipo, consulta la d
 | [**Historias de Usuario**](docs/historias-de-usuario.md) | Catálogo de historias (`US-01` a `US-15`) con criterios de aceptación BDD (*Given-When-Then*), especificaciones de frontend y contratos API. |
 | [**Diagrama de Clases**](docs/diagrama-de-clases.md) | Modelo UML completo en Mermaid, entidades TypeORM y mapeo de reglas de negocio (`RN-01` a `RN-08`). |
 | [**Dependencias y Paralelización**](docs/dependencias-y-paralelizacion.md) | Grafo visual de dependencias, camino crítico y matriz RACI. |
+| [**Despliegue Render & Vercel**](docs/despliegue-render-vercel.md) | Guía detallada para producción: Backend + PostgreSQL en Render y Frontend en Vercel. |
 
 ---
 

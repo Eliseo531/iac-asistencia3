@@ -24,22 +24,45 @@ const formatDate = (date: Date): string => {
   return date.toISOString().split('T')[0];
 };
 
-export async function runSeed() {
+export async function runSeed(externalDataSource?: DataSource) {
   console.log('🌱 [Paso Cero] Iniciando script de semilla (Database Seed)...');
 
-  const dataSource = new DataSource({
-    type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_NAME || 'asistencia_db',
-    entities: APP_ENTITIES,
-    synchronize: true, // Sincroniza esquema de tablas para entorno de desarrollo
-  });
+  let dataSource = externalDataSource;
+  let shouldClose = false;
 
-  await dataSource.initialize();
-  console.log('✅ Conexión a la base de datos establecida.');
+  if (!dataSource) {
+    const isLocal =
+      !process.env.DATABASE_URL ||
+      process.env.DATABASE_URL.includes('localhost') ||
+      process.env.DATABASE_URL.includes('127.0.0.1');
+    const enableSsl =
+      process.env.DB_SSL === 'true' || (!isLocal && !!process.env.DATABASE_URL);
+    const sslConfig = enableSsl ? { rejectUnauthorized: false } : false;
+
+    dataSource = process.env.DATABASE_URL
+      ? new DataSource({
+          type: 'postgres',
+          url: process.env.DATABASE_URL,
+          entities: APP_ENTITIES,
+          synchronize: true,
+          ssl: sslConfig,
+        })
+      : new DataSource({
+          type: 'postgres',
+          host: process.env.DB_HOST || 'localhost',
+          port: parseInt(process.env.DB_PORT || '5432', 10),
+          username: process.env.DB_USERNAME || 'postgres',
+          password: process.env.DB_PASSWORD || 'postgres',
+          database: process.env.DB_NAME || 'asistencia_db',
+          entities: APP_ENTITIES,
+          synchronize: true,
+          ssl: sslConfig,
+        });
+
+    await dataSource.initialize();
+    shouldClose = true;
+    console.log('✅ Conexión a la base de datos establecida.');
+  }
 
   const adminRepo = dataSource.getRepository(AdminUser);
   const moduleRepo = dataSource.getRepository(AcademicModule);
@@ -87,12 +110,24 @@ export async function runSeed() {
   const savedModule = await moduleRepo.save(academicModule);
   console.log(`   ↳ Módulo activo creado: [${savedModule.code}] ${savedModule.name}`);
 
-  // 4. Crear 3 Estudiantes Vinculados al Módulo (RF-01, RN-02)
+  // 4. Crear 15 Estudiantes Matriculados en el Módulo (RF-01, RN-02)
   console.log('🎓 Creando Estudiantes matriculados en el módulo activo...');
   const studentsData = [
-    { registrationNumber: '1001', fullName: 'Juan Pérez', email: 'juan@gmail.com' },
-    { registrationNumber: '1002', fullName: 'María López', email: 'maria@gmail.com' },
-    { registrationNumber: '1003', fullName: 'Carlos Ruiz', email: 'carlos@gmail.com' },
+    { registrationNumber: '1001', fullName: 'Juan Pérez Gómez', email: 'juan@gmail.com' },
+    { registrationNumber: '1002', fullName: 'María López Fernández', email: 'maria@gmail.com' },
+    { registrationNumber: '1003', fullName: 'Carlos Ruiz Morales', email: 'carlos@gmail.com' },
+    { registrationNumber: '1004', fullName: 'Ana Rodríguez Vaca', email: 'ana.rodriguez@gmail.com' },
+    { registrationNumber: '1005', fullName: 'David Mamani Quispe', email: 'david.mamani@gmail.com' },
+    { registrationNumber: '1006', fullName: 'Sofía Vargas Torrico', email: 'sofia.vargas@gmail.com' },
+    { registrationNumber: '1007', fullName: 'Lucas Mendoza Castro', email: 'lucas.mendoza@gmail.com' },
+    { registrationNumber: '1008', fullName: 'Valentina Flores Soliz', email: 'valentina.flores@gmail.com' },
+    { registrationNumber: '1009', fullName: 'Mateo Fernández Chávez', email: 'mateo.fernandez@gmail.com' },
+    { registrationNumber: '1010', fullName: 'Camila Gutiérrez Paz', email: 'camila.gutierrez@gmail.com' },
+    { registrationNumber: '1011', fullName: 'Diego Morales Pinto', email: 'diego.morales@gmail.com' },
+    { registrationNumber: '1012', fullName: 'Lucía Castro Ortiz', email: 'lucia.castro@gmail.com' },
+    { registrationNumber: '1013', fullName: 'Gabriel Romero Dorado', email: 'gabriel.romero@gmail.com' },
+    { registrationNumber: '1014', fullName: 'Valeria Suárez Justiniano', email: 'valeria.suarez@gmail.com' },
+    { registrationNumber: '1015', fullName: 'Alejandro Rojas Aguilera', email: 'alejandro.rojas@gmail.com' },
   ];
 
   const savedStudents: Student[] = [];
@@ -141,20 +176,90 @@ export async function runSeed() {
   }
   console.log(`   ↳ ${savedSchedules.length} fechas de clase programadas (incluyendo la fecha de hoy: ${formatDate(today)}).`);
 
-  // 6. Asistencia de prueba para fechas pasadas (para probar historial y faltas - US-09)
-  console.log('📝 Creando marcas de asistencia de prueba para fechas pasadas...');
-  // Juan Pérez presente en pastDate1
-  const attendance1 = attendanceRepo.create({
-    studentId: savedStudents[0].id,
-    classScheduleId: savedSchedules[0].id,
-    status: AttendanceStatus.PRESENTE,
-    markedAt: pastDate1,
-    markedByRole: UserRole.STUDENT,
-  });
-  await attendanceRepo.save(attendance1);
-  console.log('   ↳ Asistencia registrada: Juan Pérez asistió a clase pasada.');
+  // 6. Asistencias de prueba para clases pasadas y de hoy (US-08, US-09, RF-08)
+  console.log('📝 Creando marcas de asistencia de prueba...');
+  let totalAttendancesCount = 0;
 
-  // 7. Registro de Auditoría Inicial (RF-09, US-14)
+  // Clase Pasada 1: La mayoría asistió (estudiantes 0..11)
+  for (let i = 0; i < savedStudents.length; i++) {
+    const isPresent = i < 11;
+    const att = attendanceRepo.create({
+      studentId: savedStudents[i].id,
+      classScheduleId: savedSchedules[0].id,
+      status: isPresent ? AttendanceStatus.PRESENTE : AttendanceStatus.FALTA,
+      markedAt: isPresent ? pastDate1 : null,
+      markedByRole: isPresent ? UserRole.STUDENT : undefined,
+    });
+    await attendanceRepo.save(att);
+    totalAttendancesCount++;
+  }
+
+  // Clase Pasada 2: Asistencia variada
+  const presentIndexesClass2 = [0, 1, 3, 5, 7, 8, 10, 13];
+  for (let i = 0; i < savedStudents.length; i++) {
+    const isPresent = presentIndexesClass2.includes(i);
+    const att = attendanceRepo.create({
+      studentId: savedStudents[i].id,
+      classScheduleId: savedSchedules[1].id,
+      status: isPresent ? AttendanceStatus.PRESENTE : AttendanceStatus.FALTA,
+      markedAt: isPresent ? pastDate2 : null,
+      markedByRole: isPresent ? UserRole.STUDENT : undefined,
+    });
+    await attendanceRepo.save(att);
+    totalAttendancesCount++;
+  }
+
+  // Clase de HOY: 2 estudiantes ya marcaron (María López 1002 y Sofía Vargas 1006)
+  // Juan Pérez (1001), Ana Rodríguez (1004) quedan pendientes para probar la marcación en vivo
+  const todayMarkedIndexes = [1, 5];
+  for (const idx of todayMarkedIndexes) {
+    const attToday = attendanceRepo.create({
+      studentId: savedStudents[idx].id,
+      classScheduleId: savedSchedules[2].id,
+      status: AttendanceStatus.PRESENTE,
+      markedAt: today,
+      markedByRole: UserRole.STUDENT,
+    });
+    await attendanceRepo.save(attToday);
+    totalAttendancesCount++;
+  }
+
+  // 7. Registro de Justificación Administrativa de Prueba (RN-06, RN-07)
+  // David Mamani (1005) tenía FALTA en clase 2, pero el admin lo corrigió a PRESENTE
+  const davidAttendance = await attendanceRepo.findOne({
+    where: {
+      studentId: savedStudents[4].id,
+      classScheduleId: savedSchedules[1].id,
+    },
+  });
+  if (davidAttendance) {
+    davidAttendance.status = AttendanceStatus.PRESENTE;
+    davidAttendance.remarks =
+      'Justificado por certificado médico presentado en secretaría académica (RN-07)';
+    davidAttendance.markedByUserId = admin.id;
+    davidAttendance.markedByRole = UserRole.ADMIN;
+    await attendanceRepo.save(davidAttendance);
+
+    const overrideLog = logRepo.create({
+      moduleId: savedModule.id,
+      userId: admin.id,
+      userIdentifier: admin.username,
+      userRole: UserRole.ADMIN,
+      action: ActivityAction.UPDATE_ATTENDANCE,
+      entityAffected: 'Attendance',
+      entityId: davidAttendance.id,
+      previousValue: { status: AttendanceStatus.FALTA },
+      newValue: {
+        status: AttendanceStatus.PRESENTE,
+        remarks: davidAttendance.remarks,
+        studentName: savedStudents[4].fullName,
+      },
+      ipAddress: '127.0.0.1',
+    });
+    await logRepo.save(overrideLog);
+  }
+
+  // 8. Registro de Auditoría Inicial (RF-09, US-14)
   console.log('🛡️ Registrando evento inicial en log de auditoría...');
   const initialLog = logRepo.create({
     moduleId: savedModule.id,
@@ -171,11 +276,23 @@ export async function runSeed() {
   console.log('   ↳ Evento de activación registrado en auditoría.');
 
   console.log('\n🎉 [Paso Cero Completado con Éxito]');
-  console.log('Ambos programadores tienen la base de datos lista para trabajar en paralelo:');
-  console.log('  - Programador 1 puede usar el admin y trabajar en los importadores de Excel.');
-  console.log('  - Programador 2 puede iniciar sesión con "1001" o "juan@gmail.com" y probar la marcación de HOY.');
+  console.log(`  - 1 Administrador: admin@sistema.com (admin123)`);
+  console.log(`  - 1 Módulo Activo: [${savedModule.code}] ${savedModule.name}`);
+  console.log(`  - ${savedStudents.length} Estudiantes Matriculados (Matrículas 1001 a 1015)`);
+  console.log(`  - ${savedSchedules.length} Fechas de Clase`);
+  console.log(`  - ${totalAttendancesCount} Marcas de Asistencia iniciales.`);
 
-  await dataSource.destroy();
+  if (shouldClose) {
+    await dataSource.destroy();
+  }
+
+  return {
+    admin: admin.email,
+    module: `[${savedModule.code}] ${savedModule.name}`,
+    studentsCount: savedStudents.length,
+    schedulesCount: savedSchedules.length,
+    attendancesCount: totalAttendancesCount,
+  };
 }
 
 // Ejecutar si se invoca directamente

@@ -16,9 +16,11 @@ export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
-  const url = `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'
+  ).replace(/\/$/, '');
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${baseUrl}${cleanEndpoint}`;
 
   // Obtener token JWT si existe en el navegador
   let authToken: string | null = null;

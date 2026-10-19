@@ -43,3 +43,26 @@ docs/planes/
 
 
 docs/prog2/
+
+# Agent skills (local only)
+.agents/skills/
+skills-lock.json
+
+# Terraform
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+!bootstrap/terraform.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+.terraform/
+.terraform.lock.hcl
+
+iac-asistencia.pem

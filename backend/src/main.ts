@@ -8,9 +8,12 @@ import { TransformResponseInterceptor } from './common/interceptors/transform-re
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Habilitar CORS para permitir solicitudes desde el frontend (Next.js)
+  // Habilitar CORS para permitir solicitudes desde el frontend (Next.js / Vercel)
+  const allowedOrigin = process.env.FRONTEND_URL;
   app.enableCors({
-    origin: true,
+    origin: allowedOrigin
+      ? [allowedOrigin, /\.vercel\.app$/, /^http:\/\/localhost:\d+$/]
+      : true,
     credentials: true,
   });
 
@@ -68,7 +71,7 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT ?? 3000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`🚀 Servidor ejecutándose en: http://localhost:${port}/api/v1`);
   console.log(`📑 Swagger disponible en: http://localhost:${port}/api/docs`);
 }

@@ -13,6 +13,7 @@ import { RolesGuard } from './features/auth/guards/roles.guard';
 import { ModulesModule } from './features/modules/modules.module';
 import { AttendancesModule } from './features/attendances/attendances.module';
 import { StudentsModule } from './features/students/students.module';
+import { SystemModule } from './features/system/system.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { StudentsModule } from './features/students/students.module';
     ModulesModule,
     AttendancesModule,
     StudentsModule,
+    SystemModule,
   ],
   controllers: [AppController],
   providers: [
