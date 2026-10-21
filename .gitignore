@@ -54,7 +54,7 @@ skills-lock.json
 crash.log
 crash.*.log
 *.tfvars
-!bootstrap/terraform.tfvars
+
 *.tfvars.json
 override.tf
 override.tf.json
