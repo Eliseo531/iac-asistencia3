@@ -1,0 +1,13 @@
+template-file-path: cloudformation/templates/main.yaml
+
+parameters:
+  EnvironmentName: iac-asistencia
+  AdminCidr: 181.114.108.40/32
+  KeyPairName: iac-asistencia-key
+  InstanceType: t3.micro
+  AvailabilityZone: us-east-2a
+
+tags:
+  Project: iac-asistencia
+  Environment: development
+  ManagedBy: CloudFormation

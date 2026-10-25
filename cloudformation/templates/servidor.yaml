@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Instancias EC2 para frontend y backend de IaC Asistencia
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: iac-asistencia
+
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC donde se desplegaran las instancias
+
+  PublicSubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subred publica para las instancias
+
+  FrontendSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Grupo de seguridad del frontend
+
+  BackendSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Grupo de seguridad del backend
+
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: iac-asistencia-key
+    Description: Par de claves para conectarse por SSH
+
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.micro
+      - t2.micro
+    Description: Tipo de instancia EC2
+
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+Resources:
+  FrontendInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      SubnetId: !Ref PublicSubnetId
+      SecurityGroupIds:
+        - !Ref FrontendSecurityGroupId
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-frontend"
+
+  BackendInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      SubnetId: !Ref PublicSubnetId
+      SecurityGroupIds:
+        - !Ref BackendSecurityGroupId
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-backend"
+
+Outputs:
+  FrontendInstanceId:
+    Description: ID de la instancia EC2 del frontend
+    Value: !Ref FrontendInstance
+
+  FrontendPublicIP:
+    Description: IP publica del frontend
+    Value: !GetAtt FrontendInstance.PublicIp
+
+  BackendInstanceId:
+    Description: ID de la instancia EC2 del backend
+    Value: !Ref BackendInstance
+
+  BackendPublicIP:
+    Description: IP publica del backend
+    Value: !GetAtt BackendInstance.PublicIp

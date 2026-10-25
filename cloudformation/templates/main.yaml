@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Plantilla principal para desplegar IaC Asistencia en dos instancias EC2
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: iac-asistencia
+
+  AdminCidr:
+    Type: String
+    Default: 181.114.108.40/32
+    Description: IP publica autorizada para SSH
+
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: iac-asistencia-key
+
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.micro
+      - t2.micro
+
+  AvailabilityZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-east-2a
+
+Resources:
+  NetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://iac-asistencia-dev-759490700842-assets.s3.us-east-2.amazonaws.com/cloudformation/templates/red.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        AvailabilityZone: !Ref AvailabilityZone
+
+  SecurityStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://iac-asistencia-dev-759490700842-assets.s3.us-east-2.amazonaws.com/cloudformation/templates/seguridad.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        VPCId: !GetAtt NetworkStack.Outputs.VPCId
+        AdminCidr: !Ref AdminCidr
+
+  ServersStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SecurityStack
+    Properties:
+      TemplateURL: https://iac-asistencia-dev-759490700842-assets.s3.us-east-2.amazonaws.com/cloudformation/templates/servidor.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        VPCId: !GetAtt NetworkStack.Outputs.VPCId
+        PublicSubnetId: !GetAtt NetworkStack.Outputs.PublicSubnetId
+        FrontendSecurityGroupId: !GetAtt SecurityStack.Outputs.FrontendSecurityGroupId
+        BackendSecurityGroupId: !GetAtt SecurityStack.Outputs.BackendSecurityGroupId
+        KeyPairName: !Ref KeyPairName
+        InstanceType: !Ref InstanceType
+
+Outputs:
+  VPCId:
+    Description: VPC creada para IaC Asistencia
+    Value: !GetAtt NetworkStack.Outputs.VPCId
+
+  FrontendPublicIP:
+    Description: IP publica del frontend
+    Value: !GetAtt ServersStack.Outputs.FrontendPublicIP
+
+  BackendPublicIP:
+    Description: IP publica del backend
+    Value: !GetAtt ServersStack.Outputs.BackendPublicIP

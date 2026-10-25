@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Grupos de seguridad para frontend y backend de IaC Asistencia
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: iac-asistencia
+
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC donde se crearan las instancias
+
+  AdminCidr:
+    Type: String
+    Default: 181.114.108.40/32
+    Description: IP publica autorizada para SSH
+
+Resources:
+  FrontendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Acceso web al frontend Next.js
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - Description: HTTP publico para frontend
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - Description: Puerto de desarrollo Next.js
+          IpProtocol: tcp
+          FromPort: 3001
+          ToPort: 3001
+          CidrIp: 0.0.0.0/0
+        - Description: SSH solo desde la IP del administrador
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AdminCidr
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-frontend-sg"
+
+  BackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Acceso restringido al backend NestJS
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - Description: API accesible desde el frontend
+          IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          SourceSecurityGroupId: !Ref FrontendSecurityGroup
+        - Description: SSH solo desde la IP del administrador
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AdminCidr
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-backend-sg"
+
+Outputs:
+  FrontendSecurityGroupId:
+    Description: Grupo de seguridad del frontend
+    Value: !Ref FrontendSecurityGroup
+
+  BackendSecurityGroupId:
+    Description: Grupo de seguridad del backend
+    Value: !Ref BackendSecurityGroup
