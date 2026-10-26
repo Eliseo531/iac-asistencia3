@@ -26,6 +26,10 @@ Parameters:
     Type: AWS::EC2::AvailabilityZone::Name
     Default: us-east-2a
 
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
 Resources:
   NetworkStack:
     Type: AWS::CloudFormation::Stack
@@ -58,6 +62,19 @@ Resources:
         KeyPairName: !Ref KeyPairName
         InstanceType: !Ref InstanceType
 
+  PruebasBackendInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      SubnetId: !GetAtt NetworkStack.Outputs.PublicSubnetId
+      SecurityGroupIds:
+        - !GetAtt SecurityStack.Outputs.BackendSecurityGroupId
+      Tags:
+        - Key: Name
+          Value: pruebas-backend
+
 Outputs:
   VPCId:
     Description: VPC creada para IaC Asistencia
@@ -70,3 +87,11 @@ Outputs:
   BackendPublicIP:
     Description: IP publica del backend
     Value: !GetAtt ServersStack.Outputs.BackendPublicIP
+
+  PruebasBackendInstanceId:
+    Description: ID de la instancia EC2 de pruebas
+    Value: !Ref PruebasBackendInstance
+
+  PruebasBackendPublicIP:
+    Description: IP publica de la instancia EC2 de pruebas
+    Value: !GetAtt PruebasBackendInstance.PublicIp
