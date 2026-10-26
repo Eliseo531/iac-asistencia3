@@ -74,7 +74,7 @@ Resources:
       Tags:
         - Key: Name
           Value: pruebas-backend
-BackendPrueba2Instance:
+  BackendPrueba2Instance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref LatestAmiId
@@ -106,7 +106,7 @@ Outputs:
   PruebasBackendPublicIP:
     Description: IP publica de la instancia EC2 de pruebas
     Value: !GetAtt PruebasBackendInstance.PublicIp
-BackendPrueba2InstanceId:
+  BackendPrueba2InstanceId:
     Description: ID de la segunda instancia de pruebas
     Value: !Ref BackendPrueba2Instance
 
