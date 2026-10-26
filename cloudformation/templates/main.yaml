@@ -74,7 +74,18 @@ Resources:
       Tags:
         - Key: Name
           Value: pruebas-backend
-
+BackendPrueba2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      SubnetId: !GetAtt NetworkStack.Outputs.PublicSubnetId
+      SecurityGroupIds:
+        - !GetAtt SecurityStack.Outputs.BackendSecurityGroupId
+      Tags:
+        - Key: Name
+          Value: backendprueba2
 Outputs:
   VPCId:
     Description: VPC creada para IaC Asistencia
@@ -95,3 +106,10 @@ Outputs:
   PruebasBackendPublicIP:
     Description: IP publica de la instancia EC2 de pruebas
     Value: !GetAtt PruebasBackendInstance.PublicIp
+BackendPrueba2InstanceId:
+    Description: ID de la segunda instancia de pruebas
+    Value: !Ref BackendPrueba2Instance
+
+  BackendPrueba2PublicIP:
+    Description: IP publica de la segunda instancia de pruebas
+    Value: !GetAtt BackendPrueba2Instance.PublicIp
